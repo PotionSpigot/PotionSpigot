@@ -26,19 +26,18 @@ function cleanupPatches {
 
 function savePatches {
     what=$1
-    what_name=$(basename $what) # TacoSpigot - add a seperate 'name' of what, for situations where 'what' contains a slash
     target=$2
     echo "Formatting patches for $what..."
     cd "$basedir/$target"
-    git format-patch --no-stat -N -o "$basedir/${what_name}-Patches/" upstream/upstream >/dev/null
+    git format-patch --no-stat -N -o "$basedir/${what}-Patches/" upstream/upstream >/dev/null
     cd "$basedir"
-    git add -A "$basedir/${what_name}-Patches"
-    cleanupPatches "$basedir/${what_name}-Patches"
-    echo "  Patches saved for $what to $what_name-Patches/"
+    git add -A "$basedir/${what}-Patches"
+    cleanupPatches "$basedir/${what}-Patches"
+    echo "  Patches saved for $what to $what-Patches/"
 }
-
 if [ "$1" == "clean" ]; then
-	rm -rf PaperSpigot-*-Patches
+	rm -rf Spigot-*-Patches
 fi
+
 savePatches PaperSpigot-API PotionSpigot-API
 savePatches PaperSpigot-Server PotionSpigot-Server

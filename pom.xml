@@ -9,18 +9,18 @@
         <version>7</version>
     </parent>
 
-    <groupId>org.github.paperspigot</groupId>
-    <artifactId>paperspigot-parent</artifactId>
+    <groupId>org.potionspigot</groupId>
+    <artifactId>potionspigot-parent</artifactId>
     <version>dev-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>PaperSpigot-Parent</name>
-    <description>Parent project for all PaperSpigot modules.</description>
+    <name>PotionSpigot-Parent</name>
+    <description>Parent project for all PotionSpigot modules.</description>
     <url>https://github.com/PaperSpigot/Spigot</url>
 
     <modules>
-        <module>PaperSpigot-Server</module>
-        <module>PaperSpigot-API</module>
+        <module>PotionSpigot-Server</module>
+        <module>PotionSpigot-API</module>
     </modules>
 
     <properties>
