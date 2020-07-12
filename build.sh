@@ -1,3 +1,3 @@
 #!/bin/bash
 
-git submodule update --init && ./remap.sh && ./decompile.sh && ./init.sh && ./newApplyPatches.sh && mvn clean install && ./paperclip.sh
+./prepare-build.sh && mvn clean install && ./package.sh
