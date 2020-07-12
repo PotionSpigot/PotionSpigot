@@ -1,0 +1,27 @@
+From f3d82f0807302245de1a46f81117523c2c8bb6cd Mon Sep 17 00:00:00 2001
+From: Eric <ehock7229@outlook.com>
+Date: Sun, 12 Jul 2020 17:35:06 -0400
+Subject: [PATCH] add setMaxPlayers method to Bukkit
+
+
+diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
+index 8fbc8283..90bfaadd 100644
+--- a/src/main/java/org/bukkit/Bukkit.java
++++ b/src/main/java/org/bukkit/Bukkit.java
+@@ -161,6 +161,13 @@ public final class Bukkit {
+         return server.getMaxPlayers();
+     }
+ 
++    /**
++     * Set the maximum amount of players which can login to this server.
++     */
++    public static void setMaxPlayers(int players) {
++        server.setMaxPlayers(players);
++    }
++
+     /**
+      * Get the game port that the server runs on.
+      *
+-- 
+2.20.1.windows.1
+
