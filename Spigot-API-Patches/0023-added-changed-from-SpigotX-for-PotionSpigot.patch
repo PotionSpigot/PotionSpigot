@@ -1,0 +1,1830 @@
+From 0df7cb5f696a1a9cbed0a6b0b97c5061742210fa Mon Sep 17 00:00:00 2001
+From: Eric <ehock7229@outlook.com>
+Date: Sun, 12 Jul 2020 14:33:03 -0400
+Subject: [PATCH] added changed from SpigotX for PotionSpigot
+
+
+diff --git a/pom.xml b/pom.xml
+index fe9d6d26..f87b7d3a 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -4,17 +4,16 @@
+     <modelVersion>4.0.0</modelVersion>
+ 
+     <parent>
+-        <groupId>org.github.paperspigot</groupId>
+-        <artifactId>paperspigot-parent</artifactId>
++        <groupId>org.potionspigot</groupId>
++        <artifactId>potionspigot-parent</artifactId>
+         <version>dev-SNAPSHOT</version>
+     </parent>
+ 
+-    <groupId>org.github.paperspigot</groupId>
+-    <artifactId>paperspigot-api</artifactId>
++    <artifactId>potionspigot-api</artifactId>
+     <version>1.8.8-R0.1-SNAPSHOT</version>
+     <packaging>jar</packaging>
+ 
+-    <name>PaperSpigot-API</name>
++    <name>PotionSpigot-API</name>
+     <url>https://hub.spigotmc.org/stash/projects/PAPER/</url>
+     <description>An enhanced plugin API for Minecraft servers.</description>
+ 
+@@ -113,6 +112,12 @@
+             <version>1.3</version>
+             <scope>test</scope>
+         </dependency>
++        <dependency>
++            <groupId>org.projectlombok</groupId>
++            <artifactId>lombok</artifactId>
++            <version>1.16.16</version>
++            <scope>provided</scope>
++        </dependency>
+     </dependencies>
+ 
+     <build>
+diff --git a/src/main/java/co/aikar/timings/TimingsManager.java b/src/main/java/co/aikar/timings/TimingsManager.java
+index 67c39df8..7700ae45 100644
+--- a/src/main/java/co/aikar/timings/TimingsManager.java
++++ b/src/main/java/co/aikar/timings/TimingsManager.java
+@@ -57,11 +57,11 @@ public final class TimingsManager {
+     public static final FullServerTickHandler FULL_SERVER_TICK = new FullServerTickHandler();
+     public static final TimingHandler TIMINGS_TICK = Timings.ofSafe("Timings Tick", FULL_SERVER_TICK);
+     public static final Timing PLUGIN_GROUP_HANDLER = Timings.ofSafe("Plugins");
+-    public static List<String> hiddenConfigs = new ArrayList<String>();
++    public static List<String> hiddenConfigs = new ArrayList<>();
+     public static boolean privacy = false;
+ 
+-    static final Collection<TimingHandler> HANDLERS = new ArrayDeque<TimingHandler>();
+-    static final ArrayDeque<TimingHistory.MinuteReport> MINUTE_REPORTS = new ArrayDeque<TimingHistory.MinuteReport>();
++    static final Collection<TimingHandler> HANDLERS = new ArrayDeque<>();
++    static final ArrayDeque<TimingHistory.MinuteReport> MINUTE_REPORTS = new ArrayDeque<>();
+ 
+     static EvictingQueue<TimingHistory> HISTORY = EvictingQueue.create(12);
+     static TimingHandler CURRENT;
+diff --git a/src/main/java/org/bukkit/Chunk.java b/src/main/java/org/bukkit/Chunk.java
+index 05101517..243141ab 100644
+--- a/src/main/java/org/bukkit/Chunk.java
++++ b/src/main/java/org/bukkit/Chunk.java
+@@ -1,5 +1,6 @@
+ package org.bukkit;
+ 
++import org.potionspigot.chunk.FakeMultiBlockChange;
+ import org.bukkit.block.Block;
+ import org.bukkit.block.BlockState;
+ import org.bukkit.entity.Entity;
+@@ -9,116 +10,120 @@ import org.bukkit.entity.Entity;
+  */
+ public interface Chunk {
+ 
+-    /**
+-     * Gets the X-coordinate of this chunk
+-     *
+-     * @return X-coordinate
+-     */
+-    int getX();
+-
+-    /**
+-     * Gets the Z-coordinate of this chunk
+-     *
+-     * @return Z-coordinate
+-     */
+-    int getZ();
+-
+-    /**
+-     * Gets the world containing this chunk
+-     *
+-     * @return Parent World
+-     */
+-    World getWorld();
+-
+-    /**
+-     * Gets a block from this chunk
+-     *
+-     * @param x 0-15
+-     * @param y 0-127
+-     * @param z 0-15
+-     * @return the Block
+-     */
+-    Block getBlock(int x, int y, int z);
+-
+-    /**
+-     * Capture thread-safe read-only snapshot of chunk data
+-     *
+-     * @return ChunkSnapshot
+-     */
+-    ChunkSnapshot getChunkSnapshot();
+-
+-    /**
+-     * Capture thread-safe read-only snapshot of chunk data
+-     *
+-     * @param includeMaxblocky - if true, snapshot includes per-coordinate
+-     *     maximum Y values
+-     * @param includeBiome - if true, snapshot includes per-coordinate biome
+-     *     type
+-     * @param includeBiomeTempRain - if true, snapshot includes per-coordinate
+-     *     raw biome temperature and rainfall
+-     * @return ChunkSnapshot
+-     */
+-    ChunkSnapshot getChunkSnapshot(boolean includeMaxblocky, boolean includeBiome, boolean includeBiomeTempRain);
+-
+-    /**
+-     * Get a list of all entities in the chunk.
+-     *
+-     * @return The entities.
+-     */
+-    Entity[] getEntities();
+-
+-    /**
+-     * Get a list of all tile entities in the chunk.
+-     *
+-     * @return The tile entities.
+-     */
+-    BlockState[] getTileEntities();
+-
+-    /**
+-     * Checks if the chunk is loaded.
+-     *
+-     * @return True if it is loaded.
+-     */
+-    boolean isLoaded();
+-
+-    /**
+-     * Loads the chunk.
+-     *
+-     * @param generate Whether or not to generate a chunk if it doesn't
+-     *     already exist
+-     * @return true if the chunk has loaded successfully, otherwise false
+-     */
+-    boolean load(boolean generate);
+-
+-    /**
+-     * Loads the chunk.
+-     *
+-     * @return true if the chunk has loaded successfully, otherwise false
+-     */
+-    boolean load();
+-
+-    /**
+-     * Unloads and optionally saves the Chunk
+-     *
+-     * @param save Controls whether the chunk is saved
+-     * @param safe Controls whether to unload the chunk when players are
+-     *     nearby
+-     * @return true if the chunk has unloaded successfully, otherwise false
+-     */
+-    boolean unload(boolean save, boolean safe);
+-
+-    /**
+-     * Unloads and optionally saves the Chunk
+-     *
+-     * @param save Controls whether the chunk is saved
+-     * @return true if the chunk has unloaded successfully, otherwise false
+-     */
+-    boolean unload(boolean save);
+-
+-    /**
+-     * Unloads and optionally saves the Chunk
+-     *
+-     * @return true if the chunk has unloaded successfully, otherwise false
+-     */
+-    boolean unload();
++	/**
++	 * Gets the X-coordinate of this chunk
++	 *
++	 * @return X-coordinate
++	 */
++	int getX();
++
++	/**
++	 * Gets the Z-coordinate of this chunk
++	 *
++	 * @return Z-coordinate
++	 */
++	int getZ();
++
++	/**
++	 * Gets the world containing this chunk
++	 *
++	 * @return Parent World
++	 */
++	World getWorld();
++
++	/**
++	 * Gets a block from this chunk
++	 *
++	 * @param x 0-15
++	 * @param y 0-127
++	 * @param z 0-15
++	 * @return the Block
++	 */
++	Block getBlock(int x, int y, int z);
++
++	/**
++	 * Capture thread-safe read-only snapshot of chunk data
++	 *
++	 * @return ChunkSnapshot
++	 */
++	ChunkSnapshot getChunkSnapshot();
++
++	/**
++	 * Capture thread-safe read-only snapshot of chunk data
++	 *
++	 * @param includeMaxblocky     - if true, snapshot includes per-coordinate
++	 *                             maximum Y values
++	 * @param includeBiome         - if true, snapshot includes per-coordinate biome
++	 *                             type
++	 * @param includeBiomeTempRain - if true, snapshot includes per-coordinate
++	 *                             raw biome temperature and rainfall
++	 * @return ChunkSnapshot
++	 */
++	ChunkSnapshot getChunkSnapshot(boolean includeMaxblocky, boolean includeBiome, boolean includeBiomeTempRain);
++
++	/**
++	 * Get a list of all entities in the chunk.
++	 *
++	 * @return The entities.
++	 */
++	Entity[] getEntities();
++
++	/**
++	 * Get a list of all tile entities in the chunk.
++	 *
++	 * @return The tile entities.
++	 */
++	BlockState[] getTileEntities();
++
++	/**
++	 * Checks if the chunk is loaded.
++	 *
++	 * @return True if it is loaded.
++	 */
++	boolean isLoaded();
++
++	/**
++	 * Loads the chunk.
++	 *
++	 * @param generate Whether or not to generate a chunk if it doesn't
++	 *                 already exist
++	 * @return true if the chunk has loaded successfully, otherwise false
++	 */
++	boolean load(boolean generate);
++
++	/**
++	 * Loads the chunk.
++	 *
++	 * @return true if the chunk has loaded successfully, otherwise false
++	 */
++	boolean load();
++
++	/**
++	 * Unloads and optionally saves the Chunk
++	 *
++	 * @param save Controls whether the chunk is saved
++	 * @param safe Controls whether to unload the chunk when players are
++	 *             nearby
++	 * @return true if the chunk has unloaded successfully, otherwise false
++	 */
++	boolean unload(boolean save, boolean safe);
++
++	/**
++	 * Unloads and optionally saves the Chunk
++	 *
++	 * @param save Controls whether the chunk is saved
++	 * @return true if the chunk has unloaded successfully, otherwise false
++	 */
++	boolean unload(boolean save);
++
++	/**
++	 * Unloads and optionally saves the Chunk
++	 *
++	 * @return true if the chunk has unloaded successfully, otherwise false
++	 */
++	boolean unload();
++
++	// RageSpigot start
++	FakeMultiBlockChange createFakeBlockUpdate(final Location[] locations, final int[] ids, final int[] datas);
++	// RageSpigot end
+ }
+diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
+index 1b62463a..ca952177 100644
+--- a/src/main/java/org/bukkit/Server.java
++++ b/src/main/java/org/bukkit/Server.java
+@@ -135,6 +135,11 @@ public interface Server extends PluginMessageRecipient {
+      */
+     public int getMaxPlayers();
+ 
++    /**
++     * Set the maximum amount of players which can login to this server.
++     */
++    public void setMaxPlayers(int players);
++
+     /**
+      * Get the game port that the server runs on.
+      *
+diff --git a/src/main/java/org/bukkit/World.java b/src/main/java/org/bukkit/World.java
+index 325d65a3..0fbf436a 100644
+--- a/src/main/java/org/bukkit/World.java
++++ b/src/main/java/org/bukkit/World.java
+@@ -316,6 +316,16 @@ public interface World extends PluginMessageRecipient, Metadatable {
+      */
+     public Item dropItemNaturally(Location location, ItemStack item);
+ 
++    /**
++     * Drops an item at the specified {@link Location} with a random offset
++     *
++     * @param location Location to drop the item
++     * @param item ItemStack to drop
++     * @param player Player dropping the item
++     * @return ItemDrop entity created as a result of this method
++     */
++    public Item dropItemNaturally(Location location, ItemStack item, Player player);
++
+     /**
+      * Creates an {@link Arrow} entity at the given {@link Location}
+      *
+diff --git a/src/main/java/org/bukkit/command/Command.java b/src/main/java/org/bukkit/command/Command.java
+index c126a1e7..fc37ff77 100644
+--- a/src/main/java/org/bukkit/command/Command.java
++++ b/src/main/java/org/bukkit/command/Command.java
+@@ -96,17 +96,15 @@ public abstract class Command {
+ 
+         String lastWord = args[args.length - 1];
+ 
+-        Player senderPlayer = sender instanceof Player ? (Player) sender : null;
+-
+-        ArrayList<String> matchedPlayers = new ArrayList<String>();
++        ArrayList<String> matchedPlayers = new ArrayList<>();
+         for (Player player : sender.getServer().getOnlinePlayers()) {
+             String name = player.getName();
+-            if ((senderPlayer == null || senderPlayer.canSee(player)) && StringUtil.startsWithIgnoreCase(name, lastWord)) {
++            if (StringUtil.startsWithIgnoreCase(name, lastWord)) {
+                 matchedPlayers.add(name);
+             }
+         }
+ 
+-        Collections.sort(matchedPlayers, String.CASE_INSENSITIVE_ORDER);
++        matchedPlayers.sort(String.CASE_INSENSITIVE_ORDER);
+         return matchedPlayers;
+     }
+ 
+diff --git a/src/main/java/org/bukkit/command/CommandSender.java b/src/main/java/org/bukkit/command/CommandSender.java
+index 148756b9..5b9afe3d 100644
+--- a/src/main/java/org/bukkit/command/CommandSender.java
++++ b/src/main/java/org/bukkit/command/CommandSender.java
+@@ -5,31 +5,40 @@ import org.bukkit.permissions.Permissible;
+ 
+ public interface CommandSender extends Permissible {
+ 
+-    /**
+-     * Sends this sender a message
+-     *
+-     * @param message Message to be displayed
+-     */
+-    public void sendMessage(String message);
+-
+-    /**
+-     * Sends this sender multiple messages
+-     *
+-     * @param messages An array of messages to be displayed
+-     */
+-    public void sendMessage(String[] messages);
+-
+-    /**
+-     * Returns the server instance that this command is running on
+-     *
+-     * @return Server instance
+-     */
+-    public Server getServer();
+-
+-    /**
+-     * Gets the name of this command sender
+-     *
+-     * @return Name of the sender
+-     */
+-    public String getName();
++	/**
++	 * Sends this sender a message
++	 *
++	 * @param message Message to be displayed
++	 */
++	void sendMessage(String message);
++
++	/**
++	 * Sends this sender multiple messages
++	 *
++	 * @param messages An array of messages to be displayed
++	 */
++	void sendMessage(String[] messages);
++
++	/**
++	 * Returns the server instance that this command is running on
++	 *
++	 * @return Server instance
++	 */
++	Server getServer();
++
++	/**
++	 * Gets the name of this command sender
++	 *
++	 * @return Name of the sender
++	 */
++	String getName();
++
++	/**
++	 * Gets the display name of this command sender
++	 *
++	 * @return Display name of the sender
++	 */
++	String getDisplayName();
++
++	void sendFormattedMessage(String message, Object... parameters);
+ }
+diff --git a/src/main/java/org/bukkit/command/ConsoleCommandSender.java b/src/main/java/org/bukkit/command/ConsoleCommandSender.java
+index f309c2ed..084fd213 100644
+--- a/src/main/java/org/bukkit/command/ConsoleCommandSender.java
++++ b/src/main/java/org/bukkit/command/ConsoleCommandSender.java
+@@ -3,4 +3,5 @@ package org.bukkit.command;
+ import org.bukkit.conversations.Conversable;
+ 
+ public interface ConsoleCommandSender extends CommandSender, Conversable {
++
+ }
+diff --git a/src/main/java/org/bukkit/command/SimpleCommandMap.java b/src/main/java/org/bukkit/command/SimpleCommandMap.java
+index f35bc092..0d85ec96 100644
+--- a/src/main/java/org/bukkit/command/SimpleCommandMap.java
++++ b/src/main/java/org/bukkit/command/SimpleCommandMap.java
+@@ -140,19 +140,24 @@ public class SimpleCommandMap implements CommandMap {
+             return false;
+         }
+ 
+-        try {
+-            target.timings.startTiming(); // Spigot
+-            // Note: we don't return the result of target.execute as thats success / failure, we return handled (true) or not handled (false)
++        if (target.timings == null) {
+             target.execute(sender, sentCommandLabel, Arrays_copyOfRange(args, 1, args.length));
+-            target.timings.stopTiming(); // Spigot
+-        } catch (CommandException ex) {
+-            target.timings.stopTiming(); // Spigot
+-            throw ex;
+-        } catch (Throwable ex) {
+-            target.timings.stopTiming(); // Spigot
+-            String msg = "Unhandled exception executing '" + commandLine + "' in " + target;
+-            server.getPluginManager().callEvent(new ServerExceptionEvent(new ServerCommandException(ex, target, sender, args))); // Paper
+-            throw new CommandException(msg, ex);
++        } else {
++            try {
++                target.timings.startTiming(); // Spigot
++                // Note: we don't return the result of target.execute as thats success / failure, we return handled (true) or not handled (false)
++                target.execute(sender, sentCommandLabel, Arrays_copyOfRange(args, 1, args.length));
++                target.timings.stopTiming(); // Spigot
++            } catch (CommandException ex) {
++                target.timings.stopTiming(); // Spigot
++                throw ex;
++            } catch (Throwable ex) {
++                target.timings.stopTiming();
++                String msg = "Unhandled exception executing '" + commandLine + "' in " + target;
++                server.getPluginManager().callEvent(
++                        new ServerExceptionEvent(new ServerCommandException(ex, target, sender, args))); // Paper
++                throw new CommandException(msg, ex);
++            }
+         }
+ 
+         // return true as command was handled
+@@ -168,8 +173,7 @@ public class SimpleCommandMap implements CommandMap {
+     }
+ 
+     public Command getCommand(String name) {
+-        Command target = knownCommands.get(name.toLowerCase());
+-        return target;
++        return knownCommands.get(name.toLowerCase());
+     }
+ 
+     public List<String> tabComplete(CommandSender sender, String cmdLine) {
+diff --git a/src/main/java/org/bukkit/command/defaults/TimingsCommand.java b/src/main/java/org/bukkit/command/defaults/TimingsCommand.java
+index 80e0b0f1..03d63ca7 100644
+--- a/src/main/java/org/bukkit/command/defaults/TimingsCommand.java
++++ b/src/main/java/org/bukkit/command/defaults/TimingsCommand.java
+@@ -19,19 +19,6 @@ import org.bukkit.util.StringUtil;
+ 
+ import com.google.common.collect.ImmutableList;
+ 
+-// Spigot start
+-import java.io.ByteArrayOutputStream;
+-import java.io.OutputStream;
+-import java.net.HttpURLConnection;
+-import java.net.URL;
+-import java.net.URLEncoder;
+-import java.util.logging.Level;
+-
+-import org.bukkit.command.RemoteConsoleCommandSender;
+-import org.bukkit.plugin.SimplePluginManager;
+-import org.spigotmc.CustomTimingsHandler;
+-// Spigot end
+-
+ public class TimingsCommand extends BukkitCommand {
+     public static final List<String> TIMINGS_SUBCOMMANDS = ImmutableList.of("merged", "reset", "separate");
+ 
+@@ -130,7 +117,7 @@ public class TimingsCommand extends BukkitCommand {
+         Validate.notNull(alias, "Alias cannot be null");
+ 
+         if (args.length == 1) {
+-            return StringUtil.copyPartialMatches(args[0], TIMINGS_SUBCOMMANDS, new ArrayList<String>(TIMINGS_SUBCOMMANDS.size()));
++            return StringUtil.copyPartialMatches(args[0], TIMINGS_SUBCOMMANDS, new ArrayList<>(TIMINGS_SUBCOMMANDS.size()));
+         }
+         return ImmutableList.of();
+     }
+diff --git a/src/main/java/org/bukkit/command/defaults/VersionCommand.java b/src/main/java/org/bukkit/command/defaults/VersionCommand.java
+index e91e1d8c..69abb50f 100644
+--- a/src/main/java/org/bukkit/command/defaults/VersionCommand.java
++++ b/src/main/java/org/bukkit/command/defaults/VersionCommand.java
+@@ -1,272 +1,135 @@
+ package org.bukkit.command.defaults;
+ 
+-import com.google.common.base.Charsets;
++import com.google.common.collect.ImmutableList;
+ import java.util.ArrayList;
+ import java.util.Arrays;
+ import java.util.List;
+ 
+ import org.apache.commons.lang.Validate;
+ import org.bukkit.Bukkit;
+-import org.bukkit.ChatColor;
+ import org.bukkit.command.CommandSender;
+ import org.bukkit.plugin.Plugin;
+ import org.bukkit.plugin.PluginDescriptionFile;
+ import org.bukkit.util.StringUtil;
+ 
+-import com.google.common.collect.ImmutableList;
+-import com.google.common.io.Resources;
+-import java.io.BufferedReader;
+-import java.io.IOException;
+-import java.net.URL;
+-import java.net.URLEncoder;
+-import java.util.HashSet;
+-import java.util.Set;
+-import java.util.concurrent.locks.ReentrantLock;
+-import java.util.logging.Level;
+-import java.util.logging.Logger;
+-import org.json.simple.JSONObject;
+-import org.json.simple.parser.JSONParser;
+-import org.json.simple.parser.ParseException;
+-
+ public class VersionCommand extends BukkitCommand {
+-    public VersionCommand(String name) {
+-        super(name);
+-
+-        this.description = "Gets the version of this server including any plugins in use";
+-        this.usageMessage = "/version [plugin name]";
+-        this.setPermission("bukkit.command.version");
+-        this.setAliases(Arrays.asList("ver", "about"));
+-    }
+-
+-    @Override
+-    public boolean execute(CommandSender sender, String currentAlias, String[] args) {
+-        if (!testPermission(sender)) return true;
+-
+-        if (args.length == 0) {
+-            sender.sendMessage("This server is running " + Bukkit.getName() + " version " + Bukkit.getVersion() + " (Implementing API version " + Bukkit.getBukkitVersion() + ")");
+-            sendVersion(sender);
+-        } else {
+-            StringBuilder name = new StringBuilder();
+-
+-            for (String arg : args) {
+-                if (name.length() > 0) {
+-                    name.append(' ');
+-                }
+-
+-                name.append(arg);
+-            }
+-
+-            String pluginName = name.toString();
+-            Plugin exactPlugin = Bukkit.getPluginManager().getPlugin(pluginName);
+-            if (exactPlugin != null) {
+-                describeToSender(exactPlugin, sender);
+-                return true;
+-            }
+-
+-            boolean found = false;
+-            pluginName = pluginName.toLowerCase();
+-            for (Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
+-                if (plugin.getName().toLowerCase().contains(pluginName)) {
+-                    describeToSender(plugin, sender);
+-                    found = true;
+-                }
+-            }
+-
+-            if (!found) {
+-                sender.sendMessage("This server is not running any plugin by that name.");
+-                sender.sendMessage("Use /plugins to get a list of plugins.");
+-            }
+-        }
+-        return true;
+-    }
+-
+-    private void describeToSender(Plugin plugin, CommandSender sender) {
+-        PluginDescriptionFile desc = plugin.getDescription();
+-        sender.sendMessage(ChatColor.GREEN + desc.getName() + ChatColor.WHITE + " version " + ChatColor.GREEN + desc.getVersion());
+-
+-        if (desc.getDescription() != null) {
+-            sender.sendMessage(desc.getDescription());
+-        }
+-
+-        if (desc.getWebsite() != null) {
+-            sender.sendMessage("Website: " + ChatColor.GREEN + desc.getWebsite());
+-        }
+-
+-        if (!desc.getAuthors().isEmpty()) {
+-            if (desc.getAuthors().size() == 1) {
+-                sender.sendMessage("Author: " + getAuthors(desc));
+-            } else {
+-                sender.sendMessage("Authors: " + getAuthors(desc));
+-            }
+-        }
+-    }
+-
+-    private String getAuthors(final PluginDescriptionFile desc) {
+-        StringBuilder result = new StringBuilder();
+-        List<String> authors = desc.getAuthors();
+-
+-        for (int i = 0; i < authors.size(); i++) {
+-            if (result.length() > 0) {
+-                result.append(ChatColor.WHITE);
+-
+-                if (i < authors.size() - 1) {
+-                    result.append(", ");
+-                } else {
+-                    result.append(" and ");
+-                }
+-            }
+-
+-            result.append(ChatColor.GREEN);
+-            result.append(authors.get(i));
+-        }
+-
+-        return result.toString();
+-    }
+-
+-    @Override
+-    public List<String> tabComplete(CommandSender sender, String alias, String[] args) {
+-        Validate.notNull(sender, "Sender cannot be null");
+-        Validate.notNull(args, "Arguments cannot be null");
+-        Validate.notNull(alias, "Alias cannot be null");
+-
+-        if (args.length == 1) {
+-            List<String> completions = new ArrayList<String>();
+-            String toComplete = args[0].toLowerCase();
+-            for (Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
+-                if (StringUtil.startsWithIgnoreCase(plugin.getName(), toComplete)) {
+-                    completions.add(plugin.getName());
+-                }
+-            }
+-            return completions;
+-        }
+-        return ImmutableList.of();
+-    }
+-
+-    private final ReentrantLock versionLock = new ReentrantLock();
+-    private boolean hasVersion = false;
+-    private String versionMessage = null;
+-    private final Set<CommandSender> versionWaiters = new HashSet<CommandSender>();
+-    private boolean versionTaskStarted = false;
+-    private long lastCheck = 0;
+-
+-    private void sendVersion(CommandSender sender) {
+-        if (hasVersion) {
+-            if (System.currentTimeMillis() - lastCheck > 21600000) {
+-                lastCheck = System.currentTimeMillis();
+-                hasVersion = false;
+-            } else {
+-                sender.sendMessage(versionMessage);
+-                return;
+-            }
+-        }
+-        versionLock.lock();
+-        try {
+-            if (hasVersion) {
+-                sender.sendMessage(versionMessage);
+-                return;
+-            }
+-            versionWaiters.add(sender);
+-            sender.sendMessage("Checking version, please wait...");
+-            if (!versionTaskStarted) {
+-                versionTaskStarted = true;
+-                new Thread(new Runnable() {
+-
+-                    @Override
+-                    public void run() {
+-                        obtainVersion();
+-                    }
+-                }).start();
+-            }
+-        } finally {
+-            versionLock.unlock();
+-        }
+-    }
+-
+-    private void obtainVersion() {
+-        String version = Bukkit.getVersion();
+-        if (version == null) version = "Custom";
+-        // PaperSpigot start
+-        if (version.startsWith("git-PaperSpigot-")) {
+-            String[] parts = version.substring("git-PaperSpigot-".length()).split("[-\\s]");
+-            int paperSpigotVersions = getDistance("paperspigot", parts[0]);
+-            if (paperSpigotVersions == -1) {
+-                setVersionMessage("Error obtaining version information");
+-            } else {
+-                if (paperSpigotVersions == 0) {
+-                    setVersionMessage("You are running the latest version");
+-                } else {
+-                    setVersionMessage("You are " + paperSpigotVersions + " version(s) behind");
+-                }
+-            }
+-        } else if (version.startsWith("git-Spigot-")) {
+-        // PaperSpigot end
+-            String[] parts = version.substring("git-Spigot-".length()).split("-");
+-            int cbVersions = getDistance("craftbukkit", parts[1].substring(0, parts[1].indexOf(' ')));
+-            int spigotVersions = getDistance("spigot", parts[0]);
+-            if (cbVersions == -1 || spigotVersions == -1) {
+-                setVersionMessage("Error obtaining version information");
+-            } else {
+-                if (cbVersions == 0 && spigotVersions == 0) {
+-                    setVersionMessage("You are running the latest version");
+-                } else {
+-                    setVersionMessage("You are " + (cbVersions + spigotVersions) + " version(s) behind");
+-                }
+-            }
+-
+-        } else if (version.startsWith("git-Bukkit-")) {
+-            version = version.substring("git-Bukkit-".length());
+-            int cbVersions = getDistance("craftbukkit", version.substring(0, version.indexOf(' ')));
+-            if (cbVersions == -1) {
+-                setVersionMessage("Error obtaining version information");
+-            } else {
+-                if (cbVersions == 0) {
+-                    setVersionMessage("You are running the latest version");
+-                } else {
+-                    setVersionMessage("You are " + cbVersions + " version(s) behind");
+-                }
+-            }
+-        } else {
+-            setVersionMessage("Unknown version, custom build?");
+-        }
+-    }
+ 
+-    private void setVersionMessage(String msg) {
+-        lastCheck = System.currentTimeMillis();
+-        versionMessage = msg;
+-        versionLock.lock();
+-        try {
+-            hasVersion = true;
+-            versionTaskStarted = false;
+-            for (CommandSender sender : versionWaiters) {
+-                sender.sendMessage(versionMessage);
+-            }
+-            versionWaiters.clear();
+-        } finally {
+-            versionLock.unlock();
+-        }
+-    }
++	public VersionCommand(String name) {
++		super(name);
++
++		this.description = "Gets the version of this server including any plugins in use";
++		this.usageMessage = "/version [plugin name]";
++		this.setPermission("bukkit.command.version");
++		this.setAliases(Arrays.asList("ver", "about"));
++	}
++
++	@Override
++	public boolean execute(CommandSender sender, String currentAlias, String[] args) {
++		if (!testPermission(sender)) {
++			return true;
++		}
++
++		if (args.length == 0) {
++			sender.sendMessage("This server is running " +
++			                   Bukkit.getName() +
++			                   " version " +
++			                   Bukkit.getVersion() +
++			                   " (Implementing API version " +
++			                   Bukkit.getBukkitVersion() + ")");
++			// sendVersion(sender);
++		} else {
++			StringBuilder name = new StringBuilder();
++
++			for (String arg : args) {
++				if (name.length() > 0) {
++					name.append(' ');
++				}
++
++				name.append(arg);
++			}
++
++			String pluginName = name.toString();
++			Plugin exactPlugin = Bukkit.getPluginManager().getPlugin(pluginName);
++			if (exactPlugin != null) {
++				describeToSender(exactPlugin, sender);
++				return true;
++			}
++
++			boolean found = false;
++			pluginName = pluginName.toLowerCase();
++			for (Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
++				if (plugin.getName().toLowerCase().contains(pluginName)) {
++					describeToSender(plugin, sender);
++					found = true;
++				}
++			}
++
++			if (!found) {
++				sender.sendMessage("This server is not running any plugin by that name.");
++				sender.sendMessage("Use /plugins to get a list of plugins.");
++			}
++		}
++
++		return true;
++	}
++
++	private void describeToSender(Plugin plugin, CommandSender sender) {
++		PluginDescriptionFile desc = plugin.getDescription();
++		sender.sendMessage(desc.getName() + " version " + desc.getVersion());
++
++		if (desc.getDescription() != null) {
++			sender.sendMessage(desc.getDescription());
++		}
++
++		if (desc.getWebsite() != null) {
++			sender.sendMessage("Website: " + desc.getWebsite());
++		}
++
++		if (!desc.getAuthors().isEmpty()) {
++			if (desc.getAuthors().size() == 1) {
++				sender.sendMessage("Author: " + getAuthors(desc));
++			} else {
++				sender.sendMessage("Authors: " + getAuthors(desc));
++			}
++		}
++	}
++
++	private String getAuthors(final PluginDescriptionFile desc) {
++		StringBuilder result = new StringBuilder();
++		List<String> authors = desc.getAuthors();
++
++		for (int i = 0; i < authors.size(); i++) {
++			if (result.length() > 0) {
++				if (i < authors.size() - 1) {
++					result.append(", ");
++				} else {
++					result.append(" and ");
++				}
++			}
++
++			result.append(authors.get(i));
++		}
++
++		return result.toString();
++	}
++
++	@Override
++	public List<String> tabComplete(CommandSender sender, String alias, String[] args) {
++		Validate.notNull(sender, "Sender cannot be null");
++		Validate.notNull(args, "Arguments cannot be null");
++		Validate.notNull(alias, "Alias cannot be null");
++
++		if (args.length == 1) {
++			List<String> completions = new ArrayList<String>();
++			String toComplete = args[0].toLowerCase();
++			for (Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
++				if (StringUtil.startsWithIgnoreCase(plugin.getName(), toComplete)) {
++					completions.add(plugin.getName());
++				}
++			}
++			return completions;
++		}
++		return ImmutableList.of();
++	}
+ 
+-    private static int getDistance(String repo, String currentVerInt) { // PaperSpigot
+-        try {
+-            BufferedReader reader = Resources.asCharSource(
+-                    new URL("https://ci.destroystokyo.com/job/PaperSpigot/lastSuccessfulBuild/buildNumber"), // PaperSpigot
+-                    Charsets.UTF_8
+-            ).openBufferedStream();
+-            try {
+-                // PaperSpigot start
+-                int newVer = Integer.decode(reader.readLine());
+-                int currentVer = Integer.decode(currentVerInt);
+-                return newVer - currentVer;
+-            } catch (NumberFormatException ex) {
+-                //ex.printStackTrace();
+-                // PaperSpigot end
+-                return -1;
+-            } finally {
+-                reader.close();
+-            }
+-        } catch (IOException e) {
+-            e.printStackTrace();
+-            return -1;
+-        }
+-    }
+ }
+diff --git a/src/main/java/org/bukkit/entity/Entity.java b/src/main/java/org/bukkit/entity/Entity.java
+index 7fb08af4..ec9c09fb 100644
+--- a/src/main/java/org/bukkit/entity/Entity.java
++++ b/src/main/java/org/bukkit/entity/Entity.java
+@@ -10,6 +10,7 @@ import org.bukkit.util.Vector;
+ 
+ import java.util.List;
+ import java.util.UUID;
++
+ import org.bukkit.command.CommandSender;
+ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
+ 
+@@ -18,6 +19,13 @@ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
+  */
+ public interface Entity extends Metadatable, CommandSender {
+ 
++
++    public double getX();
++
++    public double getY();
++
++    public double getZ();
++
+     /**
+      * Gets the entity's current position
+      *
+@@ -80,7 +88,7 @@ public interface Entity extends Metadatable, CommandSender {
+      * vehicle, it will be dismounted prior to teleportation.
+      *
+      * @param location New location to teleport this entity to
+-     * @param cause The cause of this teleportation
++     * @param cause    The cause of this teleportation
+      * @return <code>true</code> if the teleport was successful
+      */
+     public boolean teleport(Location location, TeleportCause cause);
+@@ -99,7 +107,7 @@ public interface Entity extends Metadatable, CommandSender {
+      * vehicle, it will be dismounted prior to teleportation.
+      *
+      * @param destination Entity to teleport this entity to
+-     * @param cause The cause of this teleportation
++     * @param cause       The cause of this teleportation
+      * @return <code>true</code> if the teleport was successful
+      */
+     public boolean teleport(Entity destination, TeleportCause cause);
+@@ -137,6 +145,14 @@ public interface Entity extends Metadatable, CommandSender {
+      */
+     public int getMaxFireTicks();
+ 
++    /**
++     * Sets the entity's maximum fire ticks (ticks before the entity stops
++     * being on fire).
++     *
++     * @param ticks Current ticks remaining
++     */
++    public void setMaxFireTicks(int ticks);
++
+     /**
+      * Sets the entity's current fire ticks (ticks before the entity stops
+      * being on fire).
+@@ -145,6 +161,11 @@ public interface Entity extends Metadatable, CommandSender {
+      */
+     public void setFireTicks(int ticks);
+ 
++    /**
++     * Extinguish's a player's fire.
++     */
++    public void extinguish();
++
+     /**
+      * Mark the entity's removal.
+      */
+@@ -228,7 +249,7 @@ public interface Entity extends Metadatable, CommandSender {
+      * This event may have been cancelled.
+      *
+      * @return the last known {@link EntityDamageEvent} or null if hitherto
+-     *     unharmed
++     * unharmed
+      */
+     public EntityDamageEvent getLastDamageCause();
+ 
+@@ -344,17 +365,15 @@ public interface Entity extends Metadatable, CommandSender {
+     public boolean isCustomNameVisible();
+ 
+     // Spigot Start
+-    public class Spigot
+-    {
++    public class Spigot {
+ 
+         /**
+          * Returns whether this entity is invulnerable.
+-         *         
+-        * @return True if the entity is invulnerable.
++         *
++         * @return True if the entity is invulnerable.
+          */
+-        public boolean isInvulnerable()
+-        {
+-            throw new UnsupportedOperationException( "Not supported yet." );
++        public boolean isInvulnerable() {
++            throw new UnsupportedOperationException("Not supported yet.");
+         }
+     }
+ 
+diff --git a/src/main/java/org/bukkit/entity/Item.java b/src/main/java/org/bukkit/entity/Item.java
+index 90260b7e..c379261c 100644
+--- a/src/main/java/org/bukkit/entity/Item.java
++++ b/src/main/java/org/bukkit/entity/Item.java
+@@ -7,31 +7,35 @@ import org.bukkit.inventory.ItemStack;
+  */
+ public interface Item extends Entity {
+ 
+-    /**
+-     * Gets the item stack associated with this item drop.
+-     *
+-     * @return An item stack.
+-     */
+-    public ItemStack getItemStack();
+-
+-    /**
+-     * Sets the item stack associated with this item drop.
+-     *
+-     * @param stack An item stack.
+-     */
+-    public void setItemStack(ItemStack stack);
+-
+-    /**
+-     * Gets the delay before this Item is available to be picked up by players
+-     *
+-     * @return Remaining delay
+-     */
+-    public int getPickupDelay();
+-
+-    /**
+-     * Sets the delay before this Item is available to be picked up by players
+-     *
+-     * @param delay New delay
+-     */
+-    public void setPickupDelay(int delay);
++	/**
++	 * Gets the item stack associated with this item drop.
++	 *
++	 * @return An item stack.
++	 */
++	ItemStack getItemStack();
++
++	/**
++	 * Sets the item stack associated with this item drop.
++	 *
++	 * @param stack An item stack.
++	 */
++	void setItemStack(ItemStack stack);
++
++	/**
++	 * Gets the delay before this Item is available to be picked up by players
++	 *
++	 * @return Remaining delay
++	 */
++	int getPickupDelay();
++
++	/**
++	 * Sets the delay before this Item is available to be picked up by players
++	 *
++	 * @param delay New delay
++	 */
++	void setPickupDelay(int delay);
++
++	int getAge();
++
++	void setAge(int age);
+ }
+diff --git a/src/main/java/org/bukkit/entity/LivingEntity.java b/src/main/java/org/bukkit/entity/LivingEntity.java
+index 48e25089..16707893 100644
+--- a/src/main/java/org/bukkit/entity/LivingEntity.java
++++ b/src/main/java/org/bukkit/entity/LivingEntity.java
+@@ -5,6 +5,7 @@ import java.util.HashSet;
+ import java.util.List;
+ import java.util.Set;
+ 
++import org.potionspigot.knockback.KnockbackProfile;
+ import org.bukkit.Location;
+ import org.bukkit.Material;
+ import org.bukkit.block.Block;
+@@ -18,6 +19,19 @@ import org.bukkit.projectiles.ProjectileSource;
+  */
+ public interface LivingEntity extends Entity, Damageable, ProjectileSource {
+ 
++    //RageSpigot start
++    /**
++     * Gets the knockback profile of this player.
++     */
++    public KnockbackProfile getKnockbackProfile();
++
++    /**
++     * Sets the knockback profile of this player. The player's knockback
++     * profile overrides the global knockback profile.
++     */
++    public void setKnockbackProfile(KnockbackProfile profile);
++    //RageSpigot end
++
+     /**
+      * Gets the height of the living entity's eyes above its Location.
+      *
+diff --git a/src/main/java/org/bukkit/entity/Player.java b/src/main/java/org/bukkit/entity/Player.java
+index d02fe560..162f6553 100644
+--- a/src/main/java/org/bukkit/entity/Player.java
++++ b/src/main/java/org/bukkit/entity/Player.java
+@@ -87,6 +87,13 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
+      */
+     public void setCompassTarget(Location loc);
+ 
++    /**
++     * Get the player's ping.
++     *
++     * @return The player's ping
++     */
++    public int getPing();
++
+     /**
+      * Get the previously set compass target.
+      *
+diff --git a/src/main/java/org/bukkit/event/player/PlayerArmorStandManipulateEvent.java b/src/main/java/org/bukkit/event/player/PlayerArmorStandManipulateEvent.java
+index a9950e0e..577b2844 100644
+--- a/src/main/java/org/bukkit/event/player/PlayerArmorStandManipulateEvent.java
++++ b/src/main/java/org/bukkit/event/player/PlayerArmorStandManipulateEvent.java
+@@ -1,75 +1,75 @@
+-package org.bukkit.event.player;
+-
+-import org.bukkit.inventory.EquipmentSlot;
+-import org.bukkit.entity.Player;
+-import org.bukkit.entity.ArmorStand;
+-import org.bukkit.event.HandlerList;
+-import org.bukkit.inventory.ItemStack;
+-
+-/**
+- * Called when a player interacts with an armor stand and will either swap, retrieve or place an item.
+- */
+-public class PlayerArmorStandManipulateEvent extends PlayerInteractEntityEvent {
+-
+-    private static final HandlerList handlers = new HandlerList();
+-
+-    private final ItemStack playerItem;
+-    private final ItemStack armorStandItem;
+-    private final EquipmentSlot slot;
+-
+-    public PlayerArmorStandManipulateEvent(final Player who, final ArmorStand clickedEntity, final ItemStack playerItem, final ItemStack armorStandItem, final EquipmentSlot slot) {
+-        super(who, clickedEntity);
+-        this.playerItem = playerItem;
+-        this.armorStandItem = armorStandItem;
+-        this.slot = slot;
+-    }
+-
+-    /**
+-     * Returns the item held by the player. If this Item is null and the armor stand Item is also null,
+-     * there will be no transaction between the player and the armor stand.
+-     * If the Player's item is null, but the armor stand item is not then the player will obtain the armor stand item.
+-     * In the case that the Player's item is not null, but the armor stand item is null, the players item will be placed on the armor stand.
+-     * If both items are not null, the items will be swapped.
+-     * In the case that the event is cancelled the original items will remain the same.
+-     * @return the item held by the player.
+-     */
+-    public ItemStack getPlayerItem() {
+-        return this.playerItem;
+-    }
+-
+-    /**
+-     * Returns the item held by the armor stand.
+-     * If this Item is null and the player's Item is also null, there will be no transaction between the player and the armor stand.
+-     * If the Player's item is null, but the armor stand item is not then the player will obtain the armor stand item.
+-     * In the case that the Player's item is not null, but the armor stand item is null, the players item will be placed on the armor stand.
+-     * If both items are not null, the items will be swapped.
+-     * In the case that the event is cancelled the original items will remain the same.
+-     * @return the item held by the armor stand.
+-     */
+-    public ItemStack getArmorStandItem() {
+-        return this.armorStandItem;
+-    }
+-
+-    /**
+-     * Returns the raw item slot of the armor stand in this event.
+-     *
+-     * @return the index of the item obtained or placed of the armor stand.
+-     */
+-    public EquipmentSlot getSlot() {
+-        return this.slot;
+-    }
+-
+-    @Override
+-    public ArmorStand getRightClicked() {
+-        return (ArmorStand) this.clickedEntity;
+-    }
+-
+-    @Override
+-    public HandlerList getHandlers() {
+-        return handlers;
+-    }
+-
+-    public static HandlerList getHandlerList() {
+-        return handlers;
+-    }
+-}
++package org.bukkit.event.player;
++
++import org.bukkit.inventory.EquipmentSlot;
++import org.bukkit.entity.Player;
++import org.bukkit.entity.ArmorStand;
++import org.bukkit.event.HandlerList;
++import org.bukkit.inventory.ItemStack;
++
++/**
++ * Called when a player interacts with an armor stand and will either swap, retrieve or place an item.
++ */
++public class PlayerArmorStandManipulateEvent extends PlayerInteractEntityEvent {
++
++    private static final HandlerList handlers = new HandlerList();
++
++    private final ItemStack playerItem;
++    private final ItemStack armorStandItem;
++    private final EquipmentSlot slot;
++
++    public PlayerArmorStandManipulateEvent(final Player who, final ArmorStand clickedEntity, final ItemStack playerItem, final ItemStack armorStandItem, final EquipmentSlot slot) {
++        super(who, clickedEntity);
++        this.playerItem = playerItem;
++        this.armorStandItem = armorStandItem;
++        this.slot = slot;
++    }
++
++    /**
++     * Returns the item held by the player. If this Item is null and the armor stand Item is also null,
++     * there will be no transaction between the player and the armor stand.
++     * If the Player's item is null, but the armor stand item is not then the player will obtain the armor stand item.
++     * In the case that the Player's item is not null, but the armor stand item is null, the players item will be placed on the armor stand.
++     * If both items are not null, the items will be swapped.
++     * In the case that the event is cancelled the original items will remain the same.
++     * @return the item held by the player.
++     */
++    public ItemStack getPlayerItem() {
++        return this.playerItem;
++    }
++
++    /**
++     * Returns the item held by the armor stand.
++     * If this Item is null and the player's Item is also null, there will be no transaction between the player and the armor stand.
++     * If the Player's item is null, but the armor stand item is not then the player will obtain the armor stand item.
++     * In the case that the Player's item is not null, but the armor stand item is null, the players item will be placed on the armor stand.
++     * If both items are not null, the items will be swapped.
++     * In the case that the event is cancelled the original items will remain the same.
++     * @return the item held by the armor stand.
++     */
++    public ItemStack getArmorStandItem() {
++        return this.armorStandItem;
++    }
++
++    /**
++     * Returns the raw item slot of the armor stand in this event.
++     *
++     * @return the index of the item obtained or placed of the armor stand.
++     */
++    public EquipmentSlot getSlot() {
++        return this.slot;
++    }
++
++    @Override
++    public ArmorStand getRightClicked() {
++        return (ArmorStand) this.clickedEntity;
++    }
++
++    @Override
++    public HandlerList getHandlers() {
++        return handlers;
++    }
++
++    public static HandlerList getHandlerList() {
++        return handlers;
++    }
++}
+diff --git a/src/main/java/org/bukkit/event/player/PlayerInteractEvent.java b/src/main/java/org/bukkit/event/player/PlayerInteractEvent.java
+index b12382f4..dbde40c0 100644
+--- a/src/main/java/org/bukkit/event/player/PlayerInteractEvent.java
++++ b/src/main/java/org/bukkit/event/player/PlayerInteractEvent.java
+@@ -25,6 +25,7 @@ public class PlayerInteractEvent extends PlayerEvent implements Cancellable {
+     private Result useItemInHand;
+ 
+     public PlayerInteractEvent(final Player who, final Action action, final ItemStack item, final Block clickedBlock, final BlockFace clickedFace) {
++//    public PlayerInteractEvent(final Player who, final Action action, final ItemStack item, final Block clickedBlock) {
+         super(who);
+         this.action = action;
+         this.item = item;
+@@ -138,6 +139,7 @@ public class PlayerInteractEvent extends PlayerEvent implements Cancellable {
+      *
+      * @return BlockFace returns the face of the block that was clicked
+      */
++
+     public BlockFace getBlockFace() {
+         return blockFace;
+     }
+diff --git a/src/main/java/org/bukkit/event/world/ChunkLoadEvent.java b/src/main/java/org/bukkit/event/world/ChunkLoadEvent.java
+index a45b1cd4..2b0cdb26 100644
+--- a/src/main/java/org/bukkit/event/world/ChunkLoadEvent.java
++++ b/src/main/java/org/bukkit/event/world/ChunkLoadEvent.java
+@@ -1,6 +1,7 @@
+ package org.bukkit.event.world;
+ 
+ import org.bukkit.Chunk;
++import org.bukkit.event.Cancellable;
+ import org.bukkit.event.HandlerList;
+ 
+ /**
+@@ -10,6 +11,8 @@ public class ChunkLoadEvent extends ChunkEvent {
+     private static final HandlerList handlers = new HandlerList();
+     private final boolean newChunk;
+ 
++    private boolean cancel = false;
++
+     public ChunkLoadEvent(final Chunk chunk, final boolean newChunk) {
+         super(chunk);
+         this.newChunk = newChunk;
+diff --git a/src/main/java/org/bukkit/inventory/Inventory.java b/src/main/java/org/bukkit/inventory/Inventory.java
+index da5d83e0..c5ffcafa 100644
+--- a/src/main/java/org/bukkit/inventory/Inventory.java
++++ b/src/main/java/org/bukkit/inventory/Inventory.java
+@@ -14,19 +14,21 @@ import org.bukkit.event.inventory.InventoryType;
+  */
+ public interface Inventory extends Iterable<ItemStack> {
+ 
++    void removeAmount(Material material, int amount);
++
+     /**
+      * Returns the size of the inventory
+      *
+      * @return The size of the inventory
+      */
+-    public int getSize();
++    int getSize();
+ 
+     /**
+      * Returns the maximum stack size for an ItemStack in this inventory.
+      *
+      * @return The maximum size for an ItemStack in this inventory.
+      */
+-    public int getMaxStackSize();
++    int getMaxStackSize();
+ 
+     /**
+      * This method allows you to change the maximum stack size for an
+@@ -44,14 +46,14 @@ public interface Inventory extends Iterable<ItemStack> {
+      *
+      * @param size The new maximum stack size for items in this inventory.
+      */
+-    public void setMaxStackSize(int size);
++    void setMaxStackSize(int size);
+ 
+     /**
+      * Returns the name of the inventory
+      *
+      * @return The String with the name of the inventory
+      */
+-    public String getName();
++    String getName();
+ 
+     /**
+      * Returns the ItemStack found in the slot at the given index
+@@ -59,7 +61,7 @@ public interface Inventory extends Iterable<ItemStack> {
+      * @param index The index of the Slot's ItemStack to return
+      * @return The ItemStack in the slot
+      */
+-    public ItemStack getItem(int index);
++    ItemStack getItem(int index);
+ 
+     /**
+      * Stores the ItemStack at the given index of the inventory.
+@@ -67,7 +69,7 @@ public interface Inventory extends Iterable<ItemStack> {
+      * @param index The index where to put the ItemStack
+      * @param item The ItemStack to set
+      */
+-    public void setItem(int index, ItemStack item);
++    void setItem(int index, ItemStack item);
+ 
+     /**
+      * Stores the given ItemStacks in the inventory. This will try to fill
+@@ -89,7 +91,7 @@ public interface Inventory extends Iterable<ItemStack> {
+      * @return A HashMap containing items that didn't fit.
+      * @throws IllegalArgumentException if items or any element in it is null
+      */
+-    public HashMap<Integer, ItemStack> addItem(ItemStack... items) throws IllegalArgumentException;
++    HashMap<Integer, ItemStack> addItem(ItemStack... items) throws IllegalArgumentException;
+ 
+     /**
+      * Removes the given ItemStacks from the inventory.
+@@ -106,14 +108,14 @@ public interface Inventory extends Iterable<ItemStack> {
+      * @return A HashMap containing items that couldn't be removed.
+      * @throws IllegalArgumentException if items is null
+      */
+-    public HashMap<Integer, ItemStack> removeItem(ItemStack... items) throws IllegalArgumentException;
++    HashMap<Integer, ItemStack> removeItem(ItemStack... items) throws IllegalArgumentException;
+ 
+     /**
+      * Returns all ItemStacks from the inventory
+      *
+      * @return An array of ItemStacks from the inventory.
+      */
+-    public ItemStack[] getContents();
++    ItemStack[] getContents();
+ 
+     /**
+      * Completely replaces the inventory's contents. Removes all existing
+@@ -124,7 +126,7 @@ public interface Inventory extends Iterable<ItemStack> {
+      * @throws IllegalArgumentException If the array has more items than the
+      *     inventory.
+      */
+-    public void setContents(ItemStack[] items) throws IllegalArgumentException;
++    void setContents(ItemStack[] items) throws IllegalArgumentException;
+ 
+     /**
+      * Checks if the inventory contains any ItemStacks with the given
+@@ -135,7 +137,7 @@ public interface Inventory extends Iterable<ItemStack> {
+      * @deprecated Magic value
+      */
+     @Deprecated
+-    public boolean contains(int materialId);
++    boolean contains(int materialId);
+ 
+     /**
+      * Checks if the inventory contains any ItemStacks with the given
+@@ -145,7 +147,7 @@ public interface Inventory extends Iterable<ItemStack> {
+      * @return true if an ItemStack is found with the given Material
+      * @throws IllegalArgumentException if material is null
+      */
+-    public boolean contains(Material material) throws IllegalArgumentException;
++    boolean contains(Material material) throws IllegalArgumentException;
+ 
+     /**
+      * Checks if the inventory contains any ItemStacks matching the given
+@@ -158,7 +160,7 @@ public interface Inventory extends Iterable<ItemStack> {
+      * @return false if item is null, true if any exactly matching ItemStacks
+      *     were found
+      */
+-    public boolean contains(ItemStack item);
++    boolean contains(ItemStack item);
+ 
+     /**
+      * Checks if the inventory contains any ItemStacks with the given
+@@ -171,7 +173,7 @@ public interface Inventory extends Iterable<ItemStack> {
+      * @deprecated Magic value
+      */
+     @Deprecated
+-    public boolean contains(int materialId, int amount);
++    boolean contains(int materialId, int amount);
+ 
+     /**
+      * Checks if the inventory contains any ItemStacks with the given
+@@ -183,7 +185,7 @@ public interface Inventory extends Iterable<ItemStack> {
+      *     found to add to the given amount
+      * @throws IllegalArgumentException if material is null
+      */
+-    public boolean contains(Material material, int amount) throws IllegalArgumentException;
++    boolean contains(Material material, int amount) throws IllegalArgumentException;
+ 
+     /**
+      * Checks if the inventory contains at least the minimum amount specified
+@@ -198,7 +200,7 @@ public interface Inventory extends Iterable<ItemStack> {
+      *     amount of exactly matching ItemStacks were found
+      * @see #containsAtLeast(ItemStack, int)
+      */
+-    public boolean contains(ItemStack item, int amount);
++    boolean contains(ItemStack item, int amount);
+ 
+     /**
+      * Checks if the inventory contains ItemStacks matching the given
+@@ -209,7 +211,7 @@ public interface Inventory extends Iterable<ItemStack> {
+      * @return false if item is null, true if amount less than 1, true if
+      *     enough ItemStacks were found to add to the given amount
+      */
+-    public boolean containsAtLeast(ItemStack item, int amount);
++    boolean containsAtLeast(ItemStack item, int amount);
+ 
+     /**
+      * Returns a HashMap with all slots and ItemStacks in the inventory with
+@@ -224,7 +226,7 @@ public interface Inventory extends Iterable<ItemStack> {
+      * @deprecated Magic value
+      */
+     @Deprecated
+-    public HashMap<Integer, ? extends ItemStack> all(int materialId);
++    HashMap<Integer, ? extends ItemStack> all(int materialId);
+ 
+     /**
+      * Returns a HashMap with all slots and ItemStacks in the inventory with
+@@ -238,7 +240,7 @@ public interface Inventory extends Iterable<ItemStack> {
+      * @return A HashMap containing the slot index, ItemStack pairs
+      * @throws IllegalArgumentException if material is null
+      */
+-    public HashMap<Integer, ? extends ItemStack> all(Material material) throws IllegalArgumentException;
++    HashMap<Integer, ? extends ItemStack> all(Material material) throws IllegalArgumentException;
+ 
+     /**
+      * Finds all slots in the inventory containing any ItemStacks with the
+@@ -252,7 +254,7 @@ public interface Inventory extends Iterable<ItemStack> {
+      * @param item The ItemStack to match against
+      * @return A map from slot indexes to item at index
+      */
+-    public HashMap<Integer, ? extends ItemStack> all(ItemStack item);
++    HashMap<Integer, ? extends ItemStack> all(ItemStack item);
+ 
+     /**
+      * Finds the first slot in the inventory containing an ItemStack with the
+@@ -263,7 +265,7 @@ public interface Inventory extends Iterable<ItemStack> {
+      * @deprecated Magic value
+      */
+     @Deprecated
+-    public int first(int materialId);
++    int first(int materialId);
+ 
+     /**
+      * Finds the first slot in the inventory containing an ItemStack with the
+@@ -273,7 +275,7 @@ public interface Inventory extends Iterable<ItemStack> {
+      * @return The slot index of the given Material or -1 if not found
+      * @throws IllegalArgumentException if material is null
+      */
+-    public int first(Material material) throws IllegalArgumentException;
++    int first(Material material) throws IllegalArgumentException;
+ 
+     /**
+      * Returns the first slot in the inventory containing an ItemStack with
+@@ -283,14 +285,14 @@ public interface Inventory extends Iterable<ItemStack> {
+      * @param item The ItemStack to match against
+      * @return The slot index of the given ItemStack or -1 if not found
+      */
+-    public int first(ItemStack item);
++    int first(ItemStack item);
+ 
+     /**
+      * Returns the first empty Slot.
+      *
+      * @return The first empty Slot found, or -1 if no empty slots.
+      */
+-    public int firstEmpty();
++    int firstEmpty();
+ 
+     /**
+      * Removes all stacks in the inventory matching the given materialId.
+@@ -299,7 +301,7 @@ public interface Inventory extends Iterable<ItemStack> {
+      * @deprecated Magic value
+      */
+     @Deprecated
+-    public void remove(int materialId);
++    void remove(int materialId);
+ 
+     /**
+      * Removes all stacks in the inventory matching the given material.
+@@ -307,7 +309,7 @@ public interface Inventory extends Iterable<ItemStack> {
+      * @param material The material to remove
+      * @throws IllegalArgumentException if material is null
+      */
+-    public void remove(Material material) throws IllegalArgumentException;
++    void remove(Material material) throws IllegalArgumentException;
+ 
+     /**
+      * Removes all stacks in the inventory matching the given stack.
+@@ -317,19 +319,19 @@ public interface Inventory extends Iterable<ItemStack> {
+      *
+      * @param item The ItemStack to match against
+      */
+-    public void remove(ItemStack item);
++    void remove(ItemStack item);
+ 
+     /**
+      * Clears out a particular slot in the index.
+      *
+      * @param index The index to empty.
+      */
+-    public void clear(int index);
++    void clear(int index);
+ 
+     /**
+      * Clears out the whole Inventory.
+      */
+-    public void clear();
++    void clear();
+ 
+     /**
+      * Gets a list of players viewing the inventory. Note that a player is
+@@ -342,31 +344,31 @@ public interface Inventory extends Iterable<ItemStack> {
+      *
+      * @return A list of HumanEntities who are viewing this Inventory.
+      */
+-    public List<HumanEntity> getViewers();
++    List<HumanEntity> getViewers();
+ 
+     /**
+      * Returns the title of this inventory.
+      *
+      * @return A String with the title.
+      */
+-    public String getTitle();
++    String getTitle();
+ 
+     /**
+      * Returns what type of inventory this is.
+      *
+      * @return The InventoryType representing the type of inventory.
+      */
+-    public InventoryType getType();
++    InventoryType getType();
+ 
+     /**
+      * Gets the block or entity belonging to the open inventory
+      *
+      * @return The holder of the inventory; null if it has no holder.
+      */
+-    public InventoryHolder getHolder();
++    InventoryHolder getHolder();
+ 
+     @Override
+-    public ListIterator<ItemStack> iterator();
++    ListIterator<ItemStack> iterator();
+ 
+     /**
+      * Returns an iterator starting at the given index. If the index is
+@@ -377,5 +379,5 @@ public interface Inventory extends Iterable<ItemStack> {
+      * @param index The index.
+      * @return An iterator.
+      */
+-    public ListIterator<ItemStack> iterator(int index);
++    ListIterator<ItemStack> iterator(int index);
+ }
+diff --git a/src/main/java/org/bukkit/inventory/ShapedRecipe.java b/src/main/java/org/bukkit/inventory/ShapedRecipe.java
+index 2796473d..5e0ae781 100644
+--- a/src/main/java/org/bukkit/inventory/ShapedRecipe.java
++++ b/src/main/java/org/bukkit/inventory/ShapedRecipe.java
+@@ -50,18 +50,22 @@ public class ShapedRecipe implements Recipe {
+             Validate.notNull(row, "Shape cannot have null rows");
+             Validate.isTrue(row.length() > 0 && row.length() < 4, "Crafting rows should be 1, 2, or 3 characters, not ", row.length());
+         }
++
+         this.rows = new String[shape.length];
++
+         for (int i = 0; i < shape.length; i++) {
+             this.rows[i] = shape[i];
+         }
+ 
+         // Remove character mappings for characters that no longer exist in the shape
+         HashMap<Character, ItemStack> newIngredients = new HashMap<Character, ItemStack>();
++
+         for (String row : shape) {
+             for (Character c : row.toCharArray()) {
+                 newIngredients.put(c, ingredients.get(c));
+             }
+         }
++
+         this.ingredients = newIngredients;
+ 
+         return this;
+diff --git a/src/main/java/org/bukkit/permissions/PermissibleBase.java b/src/main/java/org/bukkit/permissions/PermissibleBase.java
+index 3b95061a..24ce9a68 100644
+--- a/src/main/java/org/bukkit/permissions/PermissibleBase.java
++++ b/src/main/java/org/bukkit/permissions/PermissibleBase.java
+@@ -1,5 +1,6 @@
+ package org.bukkit.permissions;
+ 
++import org.potionspigot.PotionSpigotBridge;
+ import java.util.HashMap;
+ import java.util.HashSet;
+ import java.util.LinkedList;
+@@ -7,6 +8,7 @@ import java.util.List;
+ import java.util.Map;
+ import java.util.Set;
+ import java.util.logging.Level;
++
+ import org.bukkit.Bukkit;
+ import org.bukkit.plugin.Plugin;
+ 
+@@ -14,10 +16,11 @@ import org.bukkit.plugin.Plugin;
+  * Base Permissible for use in any Permissible object via proxy or extension
+  */
+ public class PermissibleBase implements Permissible {
++
+     private ServerOperator opable = null;
+     private Permissible parent = this;
+-    private final List<PermissionAttachment> attachments = new LinkedList<PermissionAttachment>();
+-    private final Map<String, PermissionAttachmentInfo> permissions = new HashMap<String, PermissionAttachmentInfo>();
++    private final List<PermissionAttachment> attachments = new LinkedList<>();
++    private final Map<String, PermissionAttachmentInfo> permissions = new HashMap<>();
+ 
+     public PermissibleBase(ServerOperator opable) {
+         this.opable = opable;
+@@ -73,10 +76,16 @@ public class PermissibleBase implements Permissible {
+         } else {
+             Permission perm = Bukkit.getServer().getPluginManager().getPermission(name);
+ 
++            boolean isOp = isOp();
++
++            if (PotionSpigotBridge.disableOpPermissions) {
++                isOp = false;
++            }
++
+             if (perm != null) {
+-                return perm.getDefault().getValue(isOp());
++                return perm.getDefault().getValue(isOp);
+             } else {
+-                return Permission.DEFAULT_PERMISSION.getValue(isOp());
++                return Permission.DEFAULT_PERMISSION.getValue(isOp);
+             }
+         }
+     }
+@@ -91,7 +100,14 @@ public class PermissibleBase implements Permissible {
+         if (isPermissionSet(name)) {
+             return permissions.get(name).getValue();
+         }
+-        return perm.getDefault().getValue(isOp());
++
++        boolean isOp = isOp();
++
++        if (PotionSpigotBridge.disableOpPermissions) {
++            isOp = false;
++        }
++
++        return perm.getDefault().getValue(isOp);
+     }
+ 
+     public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value) {
+diff --git a/src/main/java/org/bukkit/plugin/java/PluginClassLoader.java b/src/main/java/org/bukkit/plugin/java/PluginClassLoader.java
+index b2cbf9e4..4354b71b 100644
+--- a/src/main/java/org/bukkit/plugin/java/PluginClassLoader.java
++++ b/src/main/java/org/bukkit/plugin/java/PluginClassLoader.java
+@@ -15,10 +15,14 @@ import org.bukkit.plugin.PluginDescriptionFile;
+ /**
+  * A ClassLoader for plugins, to allow shared classes across multiple plugins
+  */
+-public final class PluginClassLoader extends URLClassLoader { // Spigot
+-    public JavaPlugin getPlugin() { return plugin; } // Spigot
++public final class PluginClassLoader extends URLClassLoader {
++
++    public JavaPlugin getPlugin() {
++        return plugin;
++    }
++
+     private final JavaPluginLoader loader;
+-    private final Map<String, Class<?>> classes = new java.util.concurrent.ConcurrentHashMap<String, Class<?>>(); // Spigot
++    private final Map<String, Class<?>> classes = new java.util.concurrent.ConcurrentHashMap<>();
+     private final PluginDescriptionFile description;
+     private final File dataFolder;
+     private final File file;
+@@ -26,29 +30,22 @@ public final class PluginClassLoader extends URLClassLoader { // Spigot
+     private JavaPlugin pluginInit;
+     private IllegalStateException pluginState;
+ 
+-    // Spigot Start
+-    static
+-    {
+-        try
+-        {
++    static {
++        try {
+             java.lang.reflect.Method method = ClassLoader.class.getDeclaredMethod( "registerAsParallelCapable" );
+-            if ( method != null )
+-            {
++
++            if ( method != null ) {
+                 boolean oldAccessible = method.isAccessible();
+                 method.setAccessible( true );
+                 method.invoke( null );
+                 method.setAccessible( oldAccessible );
+-                org.bukkit.Bukkit.getLogger().log( java.util.logging.Level.INFO, "Set PluginClassLoader as parallel capable" );
+             }
+-        } catch ( NoSuchMethodException ex )
+-        {
++        } catch ( NoSuchMethodException ex ) {
+             // Ignore
+-        } catch ( Exception ex )
+-        {
++        } catch ( Exception ex ) {
+             org.bukkit.Bukkit.getLogger().log( java.util.logging.Level.WARNING, "Error setting PluginClassLoader as parallel capable", ex );
+         }
+     }
+-    // Spigot End
+     
+     PluginClassLoader(final JavaPluginLoader loader, final ClassLoader parent, final PluginDescriptionFile description, final File dataFolder, final File file) throws InvalidPluginException, MalformedURLException {
+         super(new URL[] {file.toURI().toURL()}, parent);
+@@ -128,4 +125,5 @@ public final class PluginClassLoader extends URLClassLoader { // Spigot
+ 
+         javaPlugin.init(loader, loader.server, description, dataFolder, file, this);
+     }
++
+ }
+diff --git a/src/main/java/org/bukkit/util/noise/SimplexNoiseGenerator.java b/src/main/java/org/bukkit/util/noise/SimplexNoiseGenerator.java
+index b052f3c3..6c5e58f7 100644
+--- a/src/main/java/org/bukkit/util/noise/SimplexNoiseGenerator.java
++++ b/src/main/java/org/bukkit/util/noise/SimplexNoiseGenerator.java
+@@ -6,7 +6,7 @@ import org.bukkit.World;
+ /**
+  * Generates simplex-based noise.
+  * <p>
+- * This is a modified version of the freely published version in the paper by
++ * This is a modified version of the freely published version in the spigot by
+  * Stefan Gustavson at
+  * <a href="http://staffwww.itn.liu.se/~stegu/simplexnoise/simplexnoise.pdf">
+  * http://staffwww.itn.liu.se/~stegu/simplexnoise/simplexnoise.pdf</a>
+-- 
+2.20.1.windows.1
+

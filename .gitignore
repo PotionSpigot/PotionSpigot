@@ -39,8 +39,8 @@ work/
 # other stuff
 Spigot-API
 Spigot-Server
-PaperSpigot-Server
-PaperSpigot-API
+PotionSpigot-Server
+PotionSpigot-API
 Bukkit
 CraftBukkit
 Paperclip

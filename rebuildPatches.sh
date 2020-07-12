@@ -39,5 +39,5 @@ if [ "$1" == "clean" ]; then
 	rm -rf Spigot-*-Patches
 fi
 
-savePatches PaperSpigot-API PotionSpigot-API
-savePatches PaperSpigot-Server PotionSpigot-Server
+savePatches Spigot-API PotionSpigot-API
+savePatches Spigot-Server PotionSpigot-Server
