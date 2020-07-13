@@ -1,0 +1,2696 @@
+From 53404f17addf83e9bca9b1b65c096273581bc5cc Mon Sep 17 00:00:00 2001
+From: Eric <ehock7229@outlook.com>
+Date: Sun, 12 Jul 2020 20:34:11 -0400
+Subject: [PATCH] ignore IO exception if paperspigot config file doesn't exist.
+
+
+diff --git a/src/main/java/net/minecraft/server/BiomeDecorator.java b/src/main/java/net/minecraft/server/BiomeDecorator.java
+new file mode 100644
+index 00000000..ecf2cce7
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/BiomeDecorator.java
+@@ -0,0 +1,351 @@
++package net.minecraft.server;
++
++import java.util.Random;
++
++/**
++ * @since 11/12/2017
++ */
++public class BiomeDecorator {
++	protected World a;
++	protected Random b;
++	protected BlockPosition c;
++	protected CustomWorldSettingsFinal d;
++	protected WorldGenerator e = new WorldGenClay(4);
++	protected WorldGenerator f;
++	protected WorldGenerator g;
++	protected WorldGenerator h;
++	protected WorldGenerator i;
++	/*protected WorldGenerator j;
++	protected WorldGenerator k;
++	protected WorldGenerator l;*/
++	protected WorldGenerator m;
++	protected WorldGenerator n;
++	protected WorldGenerator o;
++	protected WorldGenerator p;
++	protected WorldGenerator q;
++	protected WorldGenerator r;
++	protected WorldGenFlowers s;
++	protected WorldGenerator t;
++	protected WorldGenerator u;
++	protected WorldGenerator v;
++	protected WorldGenerator w;
++	protected WorldGenerator x;
++	protected WorldGenerator y;
++	protected int z;
++	protected int A;
++	protected int B;
++	protected int C;
++	protected int D;
++	protected int E;
++	protected int F;
++	protected int G;
++	protected int H;
++	protected int I;
++	protected int J;
++	protected int K;
++	public boolean L;
++
++	public BiomeDecorator() {
++		this.f = new WorldGenSand(Blocks.SAND, 7);
++		this.g = new WorldGenSand(Blocks.GRAVEL, 6);
++		this.s = new WorldGenFlowers(Blocks.YELLOW_FLOWER, BlockFlowers.EnumFlowerVarient.DANDELION);
++		this.t = new WorldGenMushrooms(Blocks.BROWN_MUSHROOM);
++		this.u = new WorldGenMushrooms(Blocks.RED_MUSHROOM);
++		this.v = new WorldGenHugeMushroom();
++		this.w = new WorldGenReed();
++		this.x = new WorldGenCactus();
++		this.y = new WorldGenWaterLily();
++		this.B = 2;
++		this.C = 1;
++		this.H = 1;
++		this.I = 3;
++		this.J = 1;
++		this.L = true;
++	}
++
++	public void a(World var1, Random var2, BiomeBase var3, BlockPosition var4) {
++		if (this.a != null) {
++			throw new RuntimeException("Already decorating");
++		} else {
++			this.a = var1;
++			String var5 = var1.getWorldData().getGeneratorOptions();
++			if (var5 != null) {
++				this.d = CustomWorldSettingsFinal.CustomWorldSettings.a(var5).b();
++			} else {
++				this.d = CustomWorldSettingsFinal.CustomWorldSettings.a("").b();
++			}
++
++			this.b = var2;
++			this.c = var4;
++			this.h = new WorldGenMinable(Blocks.DIRT.getBlockData(), this.d.I);
++			this.i = new WorldGenMinable(Blocks.GRAVEL.getBlockData(), this.d.M);
++			//this.j = new WorldGenMinable(Blocks.STONE.getBlockData().set(BlockStone.VARIANT, BlockStone
++			//		.EnumStoneVariant.GRANITE), this.d.Q);
++			//this.k = new WorldGenMinable(Blocks.STONE.getBlockData().set(BlockStone.VARIANT, BlockStone
++			//		.EnumStoneVariant.DIORITE), this.d.U);
++			//this.l = new WorldGenMinable(Blocks.STONE.getBlockData().set(BlockStone.VARIANT, BlockStone
++			//      .EnumStoneVariant.ANDESITE), this.d.Y);
++			this.m = new WorldGenMinable(Blocks.COAL_ORE.getBlockData(), this.d.ac);
++			this.n = new WorldGenMinable(Blocks.IRON_ORE.getBlockData(), this.d.ag);
++			this.o = new WorldGenMinable(Blocks.GOLD_ORE.getBlockData(), this.d.ak);
++			this.p = new WorldGenMinable(Blocks.REDSTONE_ORE.getBlockData(), this.d.ao);
++			this.q = new WorldGenMinable(Blocks.DIAMOND_ORE.getBlockData(), this.d.as);
++			this.r = new WorldGenMinable(Blocks.LAPIS_ORE.getBlockData(), this.d.aw);
++			this.a(var3);
++			this.a = null;
++			this.b = null;
++		}
++	}
++
++	protected void a(BiomeBase var1) {
++		this.a();
++
++		int var2;
++		int var3;
++		int var4;
++		for(var2 = 0; var2 < this.I; ++var2) {
++			var3 = this.b.nextInt(16) + 8;
++			var4 = this.b.nextInt(16) + 8;
++			this.f.generate(this.a, this.b, this.a.r(this.c.a(var3, 0, var4)));
++		}
++
++		for(var2 = 0; var2 < this.J; ++var2) {
++			var3 = this.b.nextInt(16) + 8;
++			var4 = this.b.nextInt(16) + 8;
++			this.e.generate(this.a, this.b, this.a.r(this.c.a(var3, 0, var4)));
++		}
++
++		for(var2 = 0; var2 < this.H; ++var2) {
++			var3 = this.b.nextInt(16) + 8;
++			var4 = this.b.nextInt(16) + 8;
++			this.g.generate(this.a, this.b, this.a.r(this.c.a(var3, 0, var4)));
++		}
++
++		var2 = this.A;
++		if (this.b.nextInt(10) == 0) {
++			++var2;
++		}
++
++		int var5;
++		BlockPosition var7;
++		for(var3 = 0; var3 < var2; ++var3) {
++			var4 = this.b.nextInt(16) + 8;
++			var5 = this.b.nextInt(16) + 8;
++			WorldGenTreeAbstract var6 = var1.a(this.b);
++			var6.e();
++			var7 = this.a.getHighestBlockYAt(this.c.a(var4, 0, var5));
++			if (var6.generate(this.a, this.b, var7)) {
++				var6.a(this.a, this.b, var7);
++			}
++		}
++
++		for(var3 = 0; var3 < this.K; ++var3) {
++			var4 = this.b.nextInt(16) + 8;
++			var5 = this.b.nextInt(16) + 8;
++			this.v.generate(this.a, this.b, this.a.getHighestBlockYAt(this.c.a(var4, 0, var5)));
++		}
++
++		BlockPosition var8;
++		int var11;
++		int var12;
++		for(var3 = 0; var3 < this.B; ++var3) {
++			var4 = this.b.nextInt(16) + 8;
++			var5 = this.b.nextInt(16) + 8;
++			var11 = this.a.getHighestBlockYAt(this.c.a(var4, 0, var5)).getY() + 32;
++			if (var11 > 0) {
++				var12 = this.b.nextInt(var11);
++				var8 = this.c.a(var4, var12, var5);
++				BlockFlowers.EnumFlowerVarient var9 = var1.a(this.b, var8);
++				BlockFlowers var10 = var9.a().a();
++				if (var10.getMaterial() != Material.AIR) {
++					this.s.a(var10, var9);
++					this.s.generate(this.a, this.b, var8);
++				}
++			}
++		}
++
++		for(var3 = 0; var3 < this.C; ++var3) {
++			var4 = this.b.nextInt(16) + 8;
++			var5 = this.b.nextInt(16) + 8;
++			var11 = this.a.getHighestBlockYAt(this.c.a(var4, 0, var5)).getY() * 2;
++			if (var11 > 0) {
++				var12 = this.b.nextInt(var11);
++				var1.b(this.b).generate(this.a, this.b, this.c.a(var4, var12, var5));
++			}
++		}
++
++		for(var3 = 0; var3 < this.D; ++var3) {
++			var4 = this.b.nextInt(16) + 8;
++			var5 = this.b.nextInt(16) + 8;
++			var11 = this.a.getHighestBlockYAt(this.c.a(var4, 0, var5)).getY() * 2;
++			if (var11 > 0) {
++				var12 = this.b.nextInt(var11);
++				(new WorldGenDeadBush()).generate(this.a, this.b, this.c.a(var4, var12, var5));
++			}
++		}
++
++		for(var3 = 0; var3 < this.z; ++var3) {
++			var4 = this.b.nextInt(16) + 8;
++			var5 = this.b.nextInt(16) + 8;
++			var11 = this.a.getHighestBlockYAt(this.c.a(var4, 0, var5)).getY() * 2;
++			if (var11 > 0) {
++				var12 = this.b.nextInt(var11);
++
++				BlockPosition var14;
++				for(var8 = this.c.a(var4, var12, var5); var8.getY() > 0; var8 = var14) {
++					var14 = var8.down();
++					if (!this.a.isEmpty(var14)) {
++						break;
++					}
++				}
++
++				this.y.generate(this.a, this.b, var8);
++			}
++		}
++
++		for(var3 = 0; var3 < this.E; ++var3) {
++			if (this.b.nextInt(4) == 0) {
++				var4 = this.b.nextInt(16) + 8;
++				var5 = this.b.nextInt(16) + 8;
++				BlockPosition var13 = this.a.getHighestBlockYAt(this.c.a(var4, 0, var5));
++				this.t.generate(this.a, this.b, var13);
++			}
++
++			if (this.b.nextInt(8) == 0) {
++				var4 = this.b.nextInt(16) + 8;
++				var5 = this.b.nextInt(16) + 8;
++				var11 = this.a.getHighestBlockYAt(this.c.a(var4, 0, var5)).getY() * 2;
++				if (var11 > 0) {
++					var12 = this.b.nextInt(var11);
++					var8 = this.c.a(var4, var12, var5);
++					this.u.generate(this.a, this.b, var8);
++				}
++			}
++		}
++
++		if (this.b.nextInt(4) == 0) {
++			var3 = this.b.nextInt(16) + 8;
++			var4 = this.b.nextInt(16) + 8;
++			var5 = this.a.getHighestBlockYAt(this.c.a(var3, 0, var4)).getY() * 2;
++			if (var5 > 0) {
++				var11 = this.b.nextInt(var5);
++				this.t.generate(this.a, this.b, this.c.a(var3, var11, var4));
++			}
++		}
++
++		if (this.b.nextInt(8) == 0) {
++			var3 = this.b.nextInt(16) + 8;
++			var4 = this.b.nextInt(16) + 8;
++			var5 = this.a.getHighestBlockYAt(this.c.a(var3, 0, var4)).getY() * 2;
++			if (var5 > 0) {
++				var11 = this.b.nextInt(var5);
++				this.u.generate(this.a, this.b, this.c.a(var3, var11, var4));
++			}
++		}
++
++		for(var3 = 0; var3 < this.F; ++var3) {
++			var4 = this.b.nextInt(16) + 8;
++			var5 = this.b.nextInt(16) + 8;
++			var11 = this.a.getHighestBlockYAt(this.c.a(var4, 0, var5)).getY() * 2;
++			if (var11 > 0) {
++				var12 = this.b.nextInt(var11);
++				this.w.generate(this.a, this.b, this.c.a(var4, var12, var5));
++			}
++		}
++
++		for(var3 = 0; var3 < 10; ++var3) {
++			var4 = this.b.nextInt(16) + 8;
++			var5 = this.b.nextInt(16) + 8;
++			var11 = this.a.getHighestBlockYAt(this.c.a(var4, 0, var5)).getY() * 2;
++			if (var11 > 0) {
++				var12 = this.b.nextInt(var11);
++				this.w.generate(this.a, this.b, this.c.a(var4, var12, var5));
++			}
++		}
++
++		if (this.b.nextInt(32) == 0) {
++			var3 = this.b.nextInt(16) + 8;
++			var4 = this.b.nextInt(16) + 8;
++			var5 = this.a.getHighestBlockYAt(this.c.a(var3, 0, var4)).getY() * 2;
++			if (var5 > 0) {
++				var11 = this.b.nextInt(var5);
++				(new WorldGenPumpkin()).generate(this.a, this.b, this.c.a(var3, var11, var4));
++			}
++		}
++
++		for(var3 = 0; var3 < this.G; ++var3) {
++			var4 = this.b.nextInt(16) + 8;
++			var5 = this.b.nextInt(16) + 8;
++			var11 = this.a.getHighestBlockYAt(this.c.a(var4, 0, var5)).getY() * 2;
++			if (var11 > 0) {
++				var12 = this.b.nextInt(var11);
++				this.x.generate(this.a, this.b, this.c.a(var4, var12, var5));
++			}
++		}
++
++		if (this.L) {
++			for(var3 = 0; var3 < 50; ++var3) {
++				var4 = this.b.nextInt(16) + 8;
++				var5 = this.b.nextInt(16) + 8;
++				var11 = this.b.nextInt(248) + 8;
++				if (var11 > 0) {
++					var12 = this.b.nextInt(var11);
++					var8 = this.c.a(var4, var12, var5);
++					(new WorldGenLiquids(Blocks.FLOWING_WATER)).generate(this.a, this.b, var8);
++				}
++			}
++
++			for(var3 = 0; var3 < 20; ++var3) {
++				var4 = this.b.nextInt(16) + 8;
++				var5 = this.b.nextInt(16) + 8;
++				var11 = this.b.nextInt(this.b.nextInt(this.b.nextInt(240) + 8) + 8);
++				var7 = this.c.a(var4, var11, var5);
++				(new WorldGenLiquids(Blocks.FLOWING_LAVA)).generate(this.a, this.b, var7);
++			}
++		}
++
++	}
++
++	protected void a(int var1, WorldGenerator var2, int var3, int var4) {
++		int var5;
++		if (var4 < var3) {
++			var5 = var3;
++			var3 = var4;
++			var4 = var5;
++		} else if (var4 == var3) {
++			if (var3 < 255) {
++				++var4;
++			} else {
++				--var3;
++			}
++		}
++
++		for(var5 = 0; var5 < var1; ++var5) {
++			BlockPosition var6 = this.c.a(this.b.nextInt(16), this.b.nextInt(var4 - var3) + var3, this.b.nextInt(16));
++			var2.generate(this.a, this.b, var6);
++		}
++
++	}
++
++	protected void b(int var1, WorldGenerator var2, int var3, int var4) {
++		for(int var5 = 0; var5 < var1; ++var5) {
++			BlockPosition var6 = this.c.a(this.b.nextInt(16), this.b.nextInt(var4) + this.b.nextInt(var4) + var3 - var4, this.b.nextInt(16));
++			var2.generate(this.a, this.b, var6);
++		}
++
++	}
++
++	protected void a() {
++		this.a(this.d.J, this.h, this.d.K, this.d.L);
++		this.a(this.d.N, this.i, this.d.O, this.d.P);
++		/*this.a(this.d.V, this.k, this.d.W, this.d.X);
++		this.a(this.d.getPort, this.j, this.d.S, this.d.T);
++		this.a(this.d.Z, this.l, this.d.aa, this.d.ab);*/
++		this.a(this.d.ad, this.m, this.d.ae, this.d.af);
++		this.a(this.d.ah, this.n, this.d.ai, this.d.aj);
++		this.a(this.d.al, this.o, this.d.am, this.d.an);
++		this.a(this.d.ap, this.p, this.d.aq, this.d.ar);
++		this.a(this.d.at, this.q, this.d.au, this.d.av);
++		this.b(this.d.ax, this.r, this.d.ay, this.d.az);
++	}
++}
+diff --git a/src/main/java/net/minecraft/server/BlockStone.java b/src/main/java/net/minecraft/server/BlockStone.java
+new file mode 100644
+index 00000000..cefc52a5
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/BlockStone.java
+@@ -0,0 +1,111 @@
++package net.minecraft.server;
++
++/**
++ * @since 11/12/2017
++ */
++import java.util.Random;
++
++public class BlockStone extends Block {
++	public static final BlockStateEnum<BlockStone.EnumStoneVariant> VARIANT = BlockStateEnum.of("variant", BlockStone.EnumStoneVariant.class);
++
++	public BlockStone() {
++		super(Material.STONE);
++		this.j(this.blockStateList.getBlockData().set(VARIANT, BlockStone.EnumStoneVariant.STONE));
++		this.a(CreativeModeTab.b);
++	}
++
++	public String getName() {
++		return LocaleI18n.get(this.a() + "." + BlockStone.EnumStoneVariant.STONE.d() + ".name");
++	}
++
++	public MaterialMapColor g(IBlockData var1) {
++		return ((BlockStone.EnumStoneVariant)var1.get(VARIANT)).c();
++	}
++
++	public Item getDropType(IBlockData var1, Random var2, int var3) {
++		return var1.get(VARIANT) == BlockStone.EnumStoneVariant.STONE ? Item.getItemOf(Blocks.COBBLESTONE) : Item.getItemOf(Blocks.STONE);
++	}
++
++	public int getDropData(IBlockData var1) {
++		return ((BlockStone.EnumStoneVariant)var1.get(VARIANT)).a();
++	}
++
++	public IBlockData fromLegacyData(int var1) {
++		return this.getBlockData().set(VARIANT, BlockStone.EnumStoneVariant.a(var1));
++	}
++
++	public int toLegacyData(IBlockData var1) {
++		return ((BlockStone.EnumStoneVariant)var1.get(VARIANT)).a();
++	}
++
++	public BlockStateList getStateList() {
++		return new BlockStateList(this, new IBlockState[]{VARIANT});
++	}
++
++	public static enum EnumStoneVariant implements INamable {
++		STONE(0, MaterialMapColor.m, "stone");
++		/*GRANITE(1, MaterialMapColor.l, "granite"),
++		GRANITE_SMOOTH(2, MaterialMapColor.l, "smooth_granite", "graniteSmooth"),
++		DIORITE(3, MaterialMapColor.p, "diorite"),
++		DIORITE_SMOOTH(4, MaterialMapColor.p, "smooth_diorite", "dioriteSmooth"),
++		ANDESITE(5, MaterialMapColor.m, "andesite"),
++		ANDESITE_SMOOTH(6, MaterialMapColor.m, "smooth_andesite", "andesiteSmooth");*/
++
++		private static final BlockStone.EnumStoneVariant[] h = new BlockStone.EnumStoneVariant[values().length];
++		private final int i;
++		private final String j;
++		private final String k;
++		private final MaterialMapColor l;
++
++		private EnumStoneVariant(int var3, MaterialMapColor var4, String var5) {
++			this(var3, var4, var5, var5);
++		}
++
++		private EnumStoneVariant(int var3, MaterialMapColor var4, String var5, String var6) {
++			this.i = var3;
++			this.j = var5;
++			this.k = var6;
++			this.l = var4;
++		}
++
++		public int a() {
++			return this.i;
++		}
++
++		public MaterialMapColor c() {
++			return this.l;
++		}
++
++		public String toString() {
++			return this.j;
++		}
++
++		public static BlockStone.EnumStoneVariant a(int var0) {
++			if (var0 < 0 || var0 >= h.length) {
++				var0 = 0;
++			}
++
++			return h[var0];
++		}
++
++		public String getName() {
++			return this.j;
++		}
++
++		public String d() {
++			return this.k;
++		}
++
++		static {
++			BlockStone.EnumStoneVariant[] var0 = values();
++			int var1 = var0.length;
++
++			for(int var2 = 0; var2 < var1; ++var2) {
++				BlockStone.EnumStoneVariant var3 = var0[var2];
++				h[var3.a()] = var3;
++			}
++
++		}
++	}
++}
++
+diff --git a/src/main/java/net/minecraft/server/PacketPlayInUseEntity.java b/src/main/java/net/minecraft/server/PacketPlayInUseEntity.java
+new file mode 100644
+index 00000000..2debebf8
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/PacketPlayInUseEntity.java
+@@ -0,0 +1,62 @@
++
++package net.minecraft.server;
++
++import java.io.IOException;
++
++public class PacketPlayInUseEntity implements Packet<PacketListenerPlayIn> {
++	private int a;
++	private PacketPlayInUseEntity.EnumEntityUseAction action;
++	private Vec3D c;
++
++	public PacketPlayInUseEntity() {
++	}
++
++	public void a(PacketDataSerializer var1) throws IOException {
++		this.a = var1.e();
++		this.action = (PacketPlayInUseEntity.EnumEntityUseAction)var1.a(PacketPlayInUseEntity.EnumEntityUseAction.class);
++		if(this.action == PacketPlayInUseEntity.EnumEntityUseAction.INTERACT_AT) {
++			this.c = new Vec3D((double)var1.readFloat(), (double)var1.readFloat(), (double)var1.readFloat());
++		}
++
++	}
++
++	public void b(PacketDataSerializer var1) throws IOException {
++		var1.b(this.a);
++		var1.a(this.action);
++		if(this.action == PacketPlayInUseEntity.EnumEntityUseAction.INTERACT_AT) {
++			var1.writeFloat((float)this.c.a);
++			var1.writeFloat((float)this.c.b);
++			var1.writeFloat((float)this.c.c);
++		}
++
++	}
++
++	public void a(PacketListenerPlayIn var1) {
++		var1.a(this);
++	}
++
++	public Entity a(World var1) {
++		return var1.a(this.a);
++	}
++
++	public PacketPlayInUseEntity.EnumEntityUseAction a() {
++		return this.action;
++	}
++
++	public Vec3D b() {
++		return this.c;
++	}
++
++	public int getA() {
++		return this.a;
++	}
++
++	public static enum EnumEntityUseAction {
++		INTERACT,
++		ATTACK,
++		INTERACT_AT;
++
++		private EnumEntityUseAction() {
++		}
++	}
++}
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutAttachEntity.java b/src/main/java/net/minecraft/server/PacketPlayOutAttachEntity.java
+new file mode 100644
+index 00000000..b80234b1
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/PacketPlayOutAttachEntity.java
+@@ -0,0 +1,34 @@
++package net.minecraft.server;
++
++import java.io.IOException;
++
++public class PacketPlayOutAttachEntity implements Packet<PacketListenerPlayOut> {
++	private int a;
++	private int b;
++	private int c;
++
++	public PacketPlayOutAttachEntity() {
++	}
++
++	public PacketPlayOutAttachEntity(int var1, Entity var2, Entity var3) {
++		this.a = var1;
++		this.b = var2.getId();
++		this.c = var3 != null ? var3.getId() : -1;
++	}
++
++	public void a(PacketDataSerializer var1) throws IOException {
++		this.b = var1.readInt();
++		this.c = var1.readInt();
++		this.a = var1.readUnsignedByte();
++	}
++
++	public void b(PacketDataSerializer var1) throws IOException {
++		var1.writeInt(this.b);
++		var1.writeInt(this.c);
++		var1.writeByte(this.a);
++	}
++
++	public void a(PacketListenerPlayOut var1) {
++		var1.a(this);
++	}
++}
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutBlockChange.java b/src/main/java/net/minecraft/server/PacketPlayOutBlockChange.java
+new file mode 100644
+index 00000000..116911f5
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/PacketPlayOutBlockChange.java
+@@ -0,0 +1,34 @@
++package net.minecraft.server;
++
++import java.io.IOException;
++
++public class PacketPlayOutBlockChange implements Packet<PacketListenerPlayOut> {
++
++    private BlockPosition a;
++    public IBlockData block; // CraftBukkit - public
++
++    public PacketPlayOutBlockChange() {}
++
++    public PacketPlayOutBlockChange(World world, BlockPosition blockposition) {
++        this.a = blockposition;
++        this.block = world.getType(blockposition);
++    }
++
++    public void a(PacketDataSerializer packetdataserializer) throws IOException {
++        this.a = packetdataserializer.c();
++        this.block = (IBlockData) Block.d.a(packetdataserializer.e());
++    }
++
++    public void b(PacketDataSerializer packetdataserializer) throws IOException {
++        packetdataserializer.a(this.a);
++        packetdataserializer.b(Block.d.b(this.block));
++    }
++
++    public void a(PacketListenerPlayOut packetlistenerplayout) {
++        packetlistenerplayout.a(this);
++    }
++
++    public BlockPosition getPosition() {
++        return a;
++    }
++}
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutEntity.java b/src/main/java/net/minecraft/server/PacketPlayOutEntity.java
+new file mode 100644
+index 00000000..157c1a1e
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/PacketPlayOutEntity.java
+@@ -0,0 +1,175 @@
++package net.minecraft.server;
++
++import java.io.IOException;
++
++public class PacketPlayOutEntity implements Packet<PacketListenerPlayOut> {
++    protected int a;
++    protected byte b;
++    protected byte c;
++    protected byte d;
++    protected byte e;
++    protected byte f;
++    protected boolean g;
++    protected boolean h;
++
++    public PacketPlayOutEntity() {
++    }
++
++    public PacketPlayOutEntity(int var1) {
++        this.a = var1;
++    }
++
++    public void a(PacketDataSerializer var1) throws IOException {
++        this.a = var1.e();
++    }
++
++    public void b(PacketDataSerializer var1) throws IOException {
++        var1.b(this.a);
++    }
++
++    public void a(PacketListenerPlayOut var1) {
++        var1.a(this);
++    }
++
++    public String toString() {
++        return "Entity_" + super.toString();
++    }
++
++    public int getA() {
++        return this.a;
++    }
++
++    public byte getB() {
++        return this.b;
++    }
++
++    public byte getC() {
++        return this.c;
++    }
++
++    public byte getD() {
++        return this.d;
++    }
++
++    public byte getE() {
++        return this.e;
++    }
++
++    public byte getF() {
++        return this.f;
++    }
++
++    public boolean isG() {
++        return this.g;
++    }
++
++    public boolean isH() {
++        return this.h;
++    }
++
++    public void setB(byte b) {
++        this.b = b;
++    }
++
++    public void setC(byte c) {
++        this.c = c;
++    }
++
++    public void setD(byte d) {
++        this.d = d;
++    }
++
++    public static class PacketPlayOutEntityLook extends PacketPlayOutEntity {
++        public PacketPlayOutEntityLook() {
++            this.h = true;
++        }
++
++        public PacketPlayOutEntityLook(int var1, byte var2, byte var3, boolean var4) {
++            super(var1);
++            this.e = var2;
++            this.f = var3;
++            this.h = true;
++            this.g = var4;
++        }
++
++        public void a(PacketDataSerializer var1) throws IOException {
++            super.a(var1);
++            this.e = var1.readByte();
++            this.f = var1.readByte();
++            this.g = var1.readBoolean();
++        }
++
++        public void b(PacketDataSerializer var1) throws IOException {
++            super.b(var1);
++            var1.writeByte(this.e);
++            var1.writeByte(this.f);
++            var1.writeBoolean(this.g);
++        }
++    }
++
++    public static class PacketPlayOutRelEntityMove extends PacketPlayOutEntity {
++        public PacketPlayOutRelEntityMove() {
++        }
++
++        public PacketPlayOutRelEntityMove(int var1, byte var2, byte var3, byte var4, boolean var5) {
++            super(var1);
++            this.b = var2;
++            this.c = var3;
++            this.d = var4;
++            this.g = var5;
++        }
++
++        public void a(PacketDataSerializer var1) throws IOException {
++            super.a(var1);
++            this.b = var1.readByte();
++            this.c = var1.readByte();
++            this.d = var1.readByte();
++            this.g = var1.readBoolean();
++        }
++
++        public void b(PacketDataSerializer var1) throws IOException {
++            super.b(var1);
++            var1.writeByte(this.b);
++            var1.writeByte(this.c);
++            var1.writeByte(this.d);
++            var1.writeBoolean(this.g);
++        }
++    }
++
++    public static class PacketPlayOutRelEntityMoveLook extends PacketPlayOutEntity {
++        public PacketPlayOutRelEntityMoveLook() {
++            this.h = true;
++        }
++
++        public PacketPlayOutRelEntityMoveLook(int var1, byte var2, byte var3, byte var4, byte var5, byte var6, boolean var7) {
++            super(var1);
++            this.b = var2;
++            this.c = var3;
++            this.d = var4;
++            this.e = var5;
++            this.f = var6;
++            this.g = var7;
++            this.h = true;
++        }
++
++        public void a(PacketDataSerializer var1) throws IOException {
++            super.a(var1);
++            this.b = var1.readByte();
++            this.c = var1.readByte();
++            this.d = var1.readByte();
++            this.e = var1.readByte();
++            this.f = var1.readByte();
++            this.g = var1.readBoolean();
++        }
++
++        public void b(PacketDataSerializer var1) throws IOException {
++            super.b(var1);
++            var1.writeByte(this.b);
++            var1.writeByte(this.c);
++            var1.writeByte(this.d);
++            var1.writeByte(this.e);
++            var1.writeByte(this.f);
++            var1.writeBoolean(this.g);
++        }
++    }
++}
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutEntityTeleport.java b/src/main/java/net/minecraft/server/PacketPlayOutEntityTeleport.java
+new file mode 100644
+index 00000000..43f9dd6b
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/PacketPlayOutEntityTeleport.java
+@@ -0,0 +1,96 @@
++package net.minecraft.server;
++
++import java.io.IOException;
++
++public class PacketPlayOutEntityTeleport implements Packet<PacketListenerPlayOut> {
++    private int a;
++    private int b;
++    private int c;
++    private int d;
++    private byte e;
++    private byte f;
++    private boolean g;
++
++    public PacketPlayOutEntityTeleport() {
++    }
++
++    public PacketPlayOutEntityTeleport(Entity var1) {
++        this.a = var1.getId();
++        this.b = MathHelper.floor(var1.locX * 32.0D);
++        this.c = MathHelper.floor(var1.locY * 32.0D);
++        this.d = MathHelper.floor(var1.locZ * 32.0D);
++        this.e = (byte) ((int) (var1.yaw * 256.0F / 360.0F));
++        this.f = (byte) ((int) (var1.pitch * 256.0F / 360.0F));
++        this.g = var1.onGround;
++    }
++
++    public PacketPlayOutEntityTeleport(int var1, int var2, int var3, int var4, byte var5, byte var6, boolean var7) {
++        this.a = var1;
++        this.b = var2;
++        this.c = var3;
++        this.d = var4;
++        this.e = var5;
++        this.f = var6;
++        this.g = var7;
++    }
++
++    public void a(PacketDataSerializer var1) throws IOException {
++        this.a = var1.e();
++        this.b = var1.readInt();
++        this.c = var1.readInt();
++        this.d = var1.readInt();
++        this.e = var1.readByte();
++        this.f = var1.readByte();
++        this.g = var1.readBoolean();
++    }
++
++    public void b(PacketDataSerializer var1) throws IOException {
++        var1.b(this.a);
++        var1.writeInt(this.b);
++        var1.writeInt(this.c);
++        var1.writeInt(this.d);
++        var1.writeByte(this.e);
++        var1.writeByte(this.f);
++        var1.writeBoolean(this.g);
++    }
++
++    public void a(PacketListenerPlayOut var1) {
++        var1.a(this);
++    }
++
++    public int getA() {
++        return this.a;
++    }
++
++    public int getB() {
++        return this.b;
++    }
++
++    public int getC() {
++        return this.c;
++    }
++
++    public int getD() {
++        return this.d;
++    }
++
++    public byte getE() {
++        return this.e;
++    }
++
++    public byte getF() {
++        return this.f;
++    }
++
++    public void setB(int b) {
++        this.b = b;
++    }
++
++    public void setC(int c) {
++        this.c = c;
++    }
++
++    public void setD(int d) {
++        this.d = d;
++    }
++}
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutEntityVelocity.java b/src/main/java/net/minecraft/server/PacketPlayOutEntityVelocity.java
+new file mode 100644
+index 00000000..1f1f5893
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/PacketPlayOutEntityVelocity.java
+@@ -0,0 +1,83 @@
++package net.minecraft.server;
++
++import java.io.IOException;
++
++public class PacketPlayOutEntityVelocity implements Packet<PacketListenerPlayOut> {
++    private int a;
++    private int b;
++    private int c;
++    private int d;
++
++    public PacketPlayOutEntityVelocity() {
++    }
++
++    public PacketPlayOutEntityVelocity(Entity var1) {
++        this(var1.getId(), var1.motX, var1.motY, var1.motZ);
++    }
++
++    public PacketPlayOutEntityVelocity(int var1, double var2, double var4, double var6) {
++        this.a = var1;
++        double var8 = 3.9D;
++        if (var2 < -var8) {
++            var2 = -var8;
++        }
++
++        if (var4 < -var8) {
++            var4 = -var8;
++        }
++
++        if (var6 < -var8) {
++            var6 = -var8;
++        }
++
++        if (var2 > var8) {
++            var2 = var8;
++        }
++
++        if (var4 > var8) {
++            var4 = var8;
++        }
++
++        if (var6 > var8) {
++            var6 = var8;
++        }
++
++        this.b = (int) (var2 * 8000.0D);
++        this.c = (int) (var4 * 8000.0D);
++        this.d = (int) (var6 * 8000.0D);
++    }
++
++    public void a(PacketDataSerializer var1) throws IOException {
++        this.a = var1.e();
++        this.b = var1.readShort();
++        this.c = var1.readShort();
++        this.d = var1.readShort();
++    }
++
++    public void b(PacketDataSerializer var1) throws IOException {
++        var1.b(this.a);
++        var1.writeShort(this.b);
++        var1.writeShort(this.c);
++        var1.writeShort(this.d);
++    }
++
++    public void a(PacketListenerPlayOut var1) {
++        var1.a(this);
++    }
++
++    public int getA() {
++        return a;
++    }
++
++    public int getB() {
++        return b;
++    }
++
++    public int getC() {
++        return c;
++    }
++
++    public int getD() {
++        return d;
++    }
++}
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutExplosion.java b/src/main/java/net/minecraft/server/PacketPlayOutExplosion.java
+new file mode 100644
+index 00000000..7c6c9471
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/PacketPlayOutExplosion.java
+@@ -0,0 +1,99 @@
++package net.minecraft.server;
++
++import com.google.common.collect.Lists;
++import java.io.IOException;
++import java.util.Iterator;
++import java.util.List;
++
++public class PacketPlayOutExplosion implements Packet<PacketListenerPlayOut> {
++    private double a;
++    private double b;
++    private double c;
++    private float d;
++    private List<BlockPosition> e;
++    private float f;
++    private float g;
++    private float h;
++
++    public PacketPlayOutExplosion() {
++    }
++
++    public PacketPlayOutExplosion(double var1, double var3, double var5, float var7, List<BlockPosition> var8, Vec3D var9) {
++        this.a = var1;
++        this.b = var3;
++        this.c = var5;
++        this.d = var7;
++        this.e = Lists.newArrayList(var8);
++        if (var9 != null) {
++            this.f = (float) var9.a;
++            this.g = (float) var9.b;
++            this.h = (float) var9.c;
++        }
++
++    }
++
++    public void a(PacketDataSerializer var1) throws IOException {
++        this.a = (double) var1.readFloat();
++        this.b = (double) var1.readFloat();
++        this.c = (double) var1.readFloat();
++        this.d = var1.readFloat();
++        int var2 = var1.readInt();
++        this.e = Lists.newArrayListWithCapacity(var2);
++        int var3 = (int) this.a;
++        int var4 = (int) this.b;
++        int var5 = (int) this.c;
++
++        for (int var6 = 0; var6 < var2; ++var6) {
++            int var7 = var1.readByte() + var3;
++            int var8 = var1.readByte() + var4;
++            int var9 = var1.readByte() + var5;
++            this.e.add(new BlockPosition(var7, var8, var9));
++        }
++
++        this.f = var1.readFloat();
++        this.g = var1.readFloat();
++        this.h = var1.readFloat();
++    }
++
++    public void b(PacketDataSerializer var1) throws IOException {
++        var1.writeFloat((float) this.a);
++        var1.writeFloat((float) this.b);
++        var1.writeFloat((float) this.c);
++        var1.writeFloat(this.d);
++        var1.writeInt(this.e.size());
++        int var2 = (int) this.a;
++        int var3 = (int) this.b;
++        int var4 = (int) this.c;
++        Iterator var5 = this.e.iterator();
++
++        while (var5.hasNext()) {
++            BlockPosition var6 = (BlockPosition) var5.next();
++            int var7 = var6.getX() - var2;
++            int var8 = var6.getY() - var3;
++            int var9 = var6.getZ() - var4;
++            var1.writeByte(var7);
++            var1.writeByte(var8);
++            var1.writeByte(var9);
++        }
++
++        var1.writeFloat(this.f);
++        var1.writeFloat(this.g);
++        var1.writeFloat(this.h);
++    }
++
++    public void a(PacketListenerPlayOut var1) {
++        var1.a(this);
++    }
++
++    public float getF() {
++        return f;
++    }
++
++    public float getG() {
++        return g;
++    }
++
++    public float getH() {
++        return h;
++    }
++}
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutKeepAlive.java b/src/main/java/net/minecraft/server/PacketPlayOutKeepAlive.java
+new file mode 100644
+index 00000000..af565675
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/PacketPlayOutKeepAlive.java
+@@ -0,0 +1,30 @@
++package net.minecraft.server;
++
++import java.io.IOException;
++
++public class PacketPlayOutKeepAlive implements Packet<PacketListenerPlayOut> {
++    private int a;
++
++    public PacketPlayOutKeepAlive() {
++    }
++
++    public PacketPlayOutKeepAlive(int var1) {
++        this.a = var1;
++    }
++
++    public void a(PacketListenerPlayOut var1) {
++        var1.a(this);
++    }
++
++    public void a(PacketDataSerializer var1) throws IOException {
++        this.a = var1.e();
++    }
++
++    public void b(PacketDataSerializer var1) throws IOException {
++        var1.b(this.a);
++    }
++
++    public int getA() {
++        return a;
++    }
++}
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutMultiBlockChange.java b/src/main/java/net/minecraft/server/PacketPlayOutMultiBlockChange.java
+new file mode 100644
+index 00000000..ab1c1673
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/PacketPlayOutMultiBlockChange.java
+@@ -0,0 +1,104 @@
++package net.minecraft.server;
++
++import java.io.IOException;
++
++/**
++ * @since 12/2/2017
++ */
++public class PacketPlayOutMultiBlockChange implements Packet<PacketListenerPlayOut> {
++	private ChunkCoordIntPair a;
++	private PacketPlayOutMultiBlockChange.MultiBlockChangeInfo[] b;
++
++	public PacketPlayOutMultiBlockChange() {
++	}
++
++	public PacketPlayOutMultiBlockChange(int var1, short[] var2, Chunk var3) {
++		this.a = new ChunkCoordIntPair(var3.locX, var3.locZ);
++		this.b = new PacketPlayOutMultiBlockChange.MultiBlockChangeInfo[var1];
++
++		for (int var4 = 0; var4 < this.b.length; ++var4) {
++			this.b[var4] = new PacketPlayOutMultiBlockChange.MultiBlockChangeInfo(var2[var4], var3);
++		}
++
++	}
++
++	public void a(PacketDataSerializer var1) throws IOException {
++		this.a = new ChunkCoordIntPair(var1.readInt(), var1.readInt());
++		this.b = new PacketPlayOutMultiBlockChange.MultiBlockChangeInfo[var1.e()];
++
++		for (int var2 = 0; var2 < this.b.length; ++var2) {
++			this.b[var2] = new PacketPlayOutMultiBlockChange.MultiBlockChangeInfo(var1.readShort(), (IBlockData) Block.d.a(var1.e()));
++		}
++
++	}
++
++	public void b(PacketDataSerializer var1) throws IOException {
++		var1.writeInt(this.a.x);
++		var1.writeInt(this.a.z);
++		var1.b(this.b.length);
++		PacketPlayOutMultiBlockChange.MultiBlockChangeInfo[] var2 = this.b;
++		int var3 = var2.length;
++
++		for (int var4 = 0; var4 < var3; ++var4) {
++			PacketPlayOutMultiBlockChange.MultiBlockChangeInfo var5 = var2[var4];
++			var1.writeShort(var5.b());
++			var1.b(Block.d.b(var5.c()));
++		}
++
++	}
++
++	public ChunkCoordIntPair getA() {
++		return a;
++	}
++
++	public MultiBlockChangeInfo[] getB() {
++		return b;
++	}
++
++	public void setA(ChunkCoordIntPair a) {
++		this.a = a;
++	}
++
++	public void setB(MultiBlockChangeInfo[] b) {
++		this.b = b;
++	}
++
++	public void a(PacketListenerPlayOut var1) {
++		var1.a(this);
++	}
++
++	public class MultiBlockChangeInfo {
++		private short b;
++		private IBlockData c;
++
++		public MultiBlockChangeInfo(short var2, IBlockData var3) {
++			this.b = var2;
++			this.c = var3;
++		}
++
++		public MultiBlockChangeInfo(short var2, Chunk var3) {
++			this.b = var2;
++			this.c = var3.getBlockData(this.a());
++		}
++
++		public BlockPosition a() {
++			return new BlockPosition(PacketPlayOutMultiBlockChange.this.a.a(this.b >> 12 & 15, this.b & 255, this.b >> 8 & 15));
++		}
++
++		public short b() {
++			return this.b;
++		}
++
++		public IBlockData c() {
++			return this.c;
++		}
++
++		public void setB(short b) {
++			this.b = b;
++		}
++
++		public void setC(IBlockData c) {
++			this.c = c;
++		}
++	}
++}
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutPosition.java b/src/main/java/net/minecraft/server/PacketPlayOutPosition.java
+new file mode 100644
+index 00000000..7ddc8c2f
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/PacketPlayOutPosition.java
+@@ -0,0 +1,121 @@
++package net.minecraft.server;
++
++import java.io.IOException;
++import java.util.EnumSet;
++import java.util.Iterator;
++import java.util.Set;
++
++public class PacketPlayOutPosition implements Packet<PacketListenerPlayOut> {
++    private double a;
++    private double b;
++    private double c;
++    private float d;
++    private float e;
++    private Set<PacketPlayOutPosition.EnumPlayerTeleportFlags> f;
++
++    public PacketPlayOutPosition() {
++    }
++
++    public PacketPlayOutPosition(double var1, double var3, double var5, float var7, float var8, Set<PacketPlayOutPosition.EnumPlayerTeleportFlags> var9) {
++        this.a = var1;
++        this.b = var3;
++        this.c = var5;
++        this.d = var7;
++        this.e = var8;
++        this.f = var9;
++    }
++
++    public void a(PacketDataSerializer var1) throws IOException {
++        this.a = var1.readDouble();
++        this.b = var1.readDouble();
++        this.c = var1.readDouble();
++        this.d = var1.readFloat();
++        this.e = var1.readFloat();
++        this.f = PacketPlayOutPosition.EnumPlayerTeleportFlags.a(var1.readUnsignedByte());
++    }
++
++    public void b(PacketDataSerializer var1) throws IOException {
++        var1.writeDouble(this.a);
++        var1.writeDouble(this.b);
++        var1.writeDouble(this.c);
++        var1.writeFloat(this.d);
++        var1.writeFloat(this.e);
++        var1.writeByte(PacketPlayOutPosition.EnumPlayerTeleportFlags.a(this.f));
++    }
++
++    public void a(PacketListenerPlayOut var1) {
++        var1.a(this);
++    }
++
++    public double getA() {
++        return this.a;
++    }
++
++    public double getB() {
++        return this.b;
++    }
++
++    public double getC() {
++        return this.c;
++    }
++
++    public float getD() {
++        return this.d;
++    }
++
++    public float getE() {
++        return this.e;
++    }
++
++    public void setE(float e) {
++        this.e = e;
++    }
++
++    public static enum EnumPlayerTeleportFlags {
++        X(0),
++        Y(1),
++        Z(2),
++        Y_ROT(3),
++        X_ROT(4);
++
++        private int f;
++
++        private EnumPlayerTeleportFlags(int var3) {
++            this.f = var3;
++        }
++
++        public static Set<PacketPlayOutPosition.EnumPlayerTeleportFlags> a(int var0) {
++            EnumSet var1 = EnumSet.noneOf(PacketPlayOutPosition.EnumPlayerTeleportFlags.class);
++            PacketPlayOutPosition.EnumPlayerTeleportFlags[] var2 = values();
++            int var3 = var2.length;
++
++            for (int var4 = 0; var4 < var3; ++var4) {
++                PacketPlayOutPosition.EnumPlayerTeleportFlags var5 = var2[var4];
++                if (var5.b(var0)) {
++                    var1.add(var5);
++                }
++            }
++
++            return var1;
++        }
++
++        public static int a(Set<PacketPlayOutPosition.EnumPlayerTeleportFlags> var0) {
++            int var1 = 0;
++
++            PacketPlayOutPosition.EnumPlayerTeleportFlags var3;
++            for (Iterator var2 = var0.iterator(); var2.hasNext(); var1 |= var3.a()) {
++                var3 = (PacketPlayOutPosition.EnumPlayerTeleportFlags) var2.next();
++            }
++
++            return var1;
++        }
++
++        private int a() {
++            return 1 << this.f;
++        }
++
++        private boolean b(int var1) {
++            return (var1 & this.a()) == this.a();
++        }
++    }
++}
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutSpawnEntity.java b/src/main/java/net/minecraft/server/PacketPlayOutSpawnEntity.java
+new file mode 100644
+index 00000000..f28ce5c5
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/PacketPlayOutSpawnEntity.java
+@@ -0,0 +1,131 @@
++package net.minecraft.server;
++
++import java.io.IOException;
++
++public class PacketPlayOutSpawnEntity implements Packet<PacketListenerPlayOut> {
++	private int a;
++	private int b;
++	private int c;
++	private int d;
++	private int e;
++	private int f;
++	private int g;
++	private int h;
++	private int i;
++	private int j;
++	private int k;
++
++	public PacketPlayOutSpawnEntity() {
++	}
++
++	public PacketPlayOutSpawnEntity(Entity var1, int var2) {
++		this(var1, var2, 0);
++	}
++
++	public PacketPlayOutSpawnEntity(Entity var1, int var2, int var3) {
++		this.a = var1.getId();
++		this.b = MathHelper.floor(var1.locX * 32.0D);
++		this.c = MathHelper.floor(var1.locY * 32.0D);
++		this.d = MathHelper.floor(var1.locZ * 32.0D);
++		this.h = MathHelper.d(var1.pitch * 256.0F / 360.0F);
++		this.i = MathHelper.d(var1.yaw * 256.0F / 360.0F);
++		this.j = var2;
++		this.k = var3;
++		if (var3 > 0) {
++			double var4 = var1.motX;
++			double var6 = var1.motY;
++			double var8 = var1.motZ;
++			double var10 = 3.9D;
++			if (var4 < -var10) {
++				var4 = -var10;
++			}
++
++			if (var6 < -var10) {
++				var6 = -var10;
++			}
++
++			if (var8 < -var10) {
++				var8 = -var10;
++			}
++
++			if (var4 > var10) {
++				var4 = var10;
++			}
++
++			if (var6 > var10) {
++				var6 = var10;
++			}
++
++			if (var8 > var10) {
++				var8 = var10;
++			}
++
++			this.e = (int)(var4 * 8000.0D);
++			this.f = (int)(var6 * 8000.0D);
++			this.g = (int)(var8 * 8000.0D);
++		}
++
++	}
++
++	public void a(PacketDataSerializer var1) throws IOException {
++		this.a = var1.e();
++		this.j = var1.readByte();
++		this.b = var1.readInt();
++		this.c = var1.readInt();
++		this.d = var1.readInt();
++		this.h = var1.readByte();
++		this.i = var1.readByte();
++		this.k = var1.readInt();
++		if (this.k > 0) {
++			this.e = var1.readShort();
++			this.f = var1.readShort();
++			this.g = var1.readShort();
++		}
++
++	}
++
++	public void b(PacketDataSerializer var1) throws IOException {
++		var1.b(this.a);
++		var1.writeByte(this.j);
++		var1.writeInt(this.b);
++		var1.writeInt(this.c);
++		var1.writeInt(this.d);
++		var1.writeByte(this.h);
++		var1.writeByte(this.i);
++		var1.writeInt(this.k);
++		if (this.k > 0) {
++			var1.writeShort(this.e);
++			var1.writeShort(this.f);
++			var1.writeShort(this.g);
++		}
++
++	}
++
++	public void a(PacketListenerPlayOut var1) {
++		var1.a(this);
++	}
++
++	public void a(int var1) {
++		this.b = var1;
++	}
++
++	public void b(int var1) {
++		this.c = var1;
++	}
++
++	public void c(int var1) {
++		this.d = var1;
++	}
++
++	public void d(int var1) {
++		this.e = var1;
++	}
++
++	public void e(int var1) {
++		this.f = var1;
++	}
++
++	public void f(int var1) {
++		this.g = var1;
++	}
++}
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutSpawnEntityLiving.java b/src/main/java/net/minecraft/server/PacketPlayOutSpawnEntityLiving.java
+new file mode 100644
+index 00000000..b4c8f119
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/PacketPlayOutSpawnEntityLiving.java
+@@ -0,0 +1,106 @@
++//
++// Source code recreated from a .class file by IntelliJ IDEA
++// (powered by Fernflower decompiler)
++//
++
++package net.minecraft.server;
++
++import java.io.IOException;
++import java.util.List;
++import net.minecraft.server.DataWatcher.WatchableObject;
++
++public class PacketPlayOutSpawnEntityLiving implements Packet<PacketListenerPlayOut> {
++	private int a;
++	private int b;
++	private int c;
++	private int d;
++	private int e;
++	private int f;
++	private int g;
++	private int h;
++	private byte i;
++	private byte j;
++	private byte k;
++	private DataWatcher l;
++	private List<WatchableObject> m;
++
++	public PacketPlayOutSpawnEntityLiving() {
++	}
++
++	public PacketPlayOutSpawnEntityLiving(EntityLiving var1) {
++		this.a = var1.getId();
++		this.b = (byte)EntityTypes.a(var1);
++		this.c = MathHelper.floor(var1.locX * 32.0D);
++		this.d = MathHelper.floor(var1.locY * 32.0D);
++		this.e = MathHelper.floor(var1.locZ * 32.0D);
++		this.i = (byte)((int)(var1.yaw * 256.0F / 360.0F));
++		this.j = (byte)((int)(var1.pitch * 256.0F / 360.0F));
++		this.k = (byte)((int)(var1.aK * 256.0F / 360.0F));
++		double var2 = 3.9D;
++		double var4 = var1.motX;
++		double var6 = var1.motY;
++		double var8 = var1.motZ;
++		if (var4 < -var2) {
++			var4 = -var2;
++		}
++
++		if (var6 < -var2) {
++			var6 = -var2;
++		}
++
++		if (var8 < -var2) {
++			var8 = -var2;
++		}
++
++		if (var4 > var2) {
++			var4 = var2;
++		}
++
++		if (var6 > var2) {
++			var6 = var2;
++		}
++
++		if (var8 > var2) {
++			var8 = var2;
++		}
++
++		this.f = (int)(var4 * 8000.0D);
++		this.g = (int)(var6 * 8000.0D);
++		this.h = (int)(var8 * 8000.0D);
++		this.l = var1.getDataWatcher();
++	}
++
++	public void a(PacketDataSerializer var1) throws IOException {
++		this.a = var1.e();
++		this.b = var1.readByte() & 255;
++		this.c = var1.readInt();
++		this.d = var1.readInt();
++		this.e = var1.readInt();
++		this.i = var1.readByte();
++		this.j = var1.readByte();
++		this.k = var1.readByte();
++		this.f = var1.readShort();
++		this.g = var1.readShort();
++		this.h = var1.readShort();
++		this.m = DataWatcher.b(var1);
++	}
++
++	public void b(PacketDataSerializer var1) throws IOException {
++		var1.b(this.a);
++		var1.writeByte(this.b & 255);
++		var1.writeInt(this.c);
++		var1.writeInt(this.d);
++		var1.writeInt(this.e);
++		var1.writeByte(this.i);
++		var1.writeByte(this.j);
++		var1.writeByte(this.k);
++		var1.writeShort(this.f);
++		var1.writeShort(this.g);
++		var1.writeShort(this.h);
++		this.l.a(var1);
++	}
++
++	public void a(PacketListenerPlayOut var1) {
++		var1.a(this);
++	}
++}
+diff --git a/src/main/java/net/minecraft/server/RecipesCrafting.java b/src/main/java/net/minecraft/server/RecipesCrafting.java
+new file mode 100644
+index 00000000..b3f0fc51
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/RecipesCrafting.java
+@@ -0,0 +1,35 @@
++package net.minecraft.server;
++
++public class RecipesCrafting {
++
++	public void a(CraftingManager craftingManager) {
++		craftingManager.registerShapedRecipe(new ItemStack(Blocks.CHEST), "###", "# #", "###", '#', Blocks.PLANKS);
++		craftingManager.registerShapedRecipe(new ItemStack(Blocks.TRAPPED_CHEST), "#-", '#', Blocks.CHEST, '-', Blocks.TRIPWIRE_HOOK);
++		craftingManager.registerShapedRecipe(new ItemStack(Blocks.ENDER_CHEST), "###", "#E#", "###", '#', Blocks.OBSIDIAN, 'E', Items.ENDER_EYE);
++		craftingManager.registerShapedRecipe(new ItemStack(Blocks.FURNACE), "###", "# #", "###", '#', Blocks.COBBLESTONE);
++		craftingManager.registerShapedRecipe(new ItemStack(Blocks.CRAFTING_TABLE), "##", "##", '#', Blocks.PLANKS);
++		craftingManager.registerShapedRecipe(new ItemStack(Blocks.SANDSTONE), "##", "##", '#', new ItemStack(Blocks.SAND, 1, BlockSand.EnumSandVariant.SAND.a()));
++		craftingManager.registerShapedRecipe(new ItemStack(Blocks.RED_SANDSTONE), "##", "##", '#', new ItemStack(Blocks.SAND, 1, BlockSand.EnumSandVariant.RED_SAND.a()));
++		craftingManager.registerShapedRecipe(new ItemStack(Blocks.SANDSTONE, 4, BlockSandStone.EnumSandstoneVariant.SMOOTH.a()), "##", "##", '#', new ItemStack(Blocks.SANDSTONE, 1, BlockSandStone.EnumSandstoneVariant.DEFAULT.a()));
++		craftingManager.registerShapedRecipe(new ItemStack(Blocks.RED_SANDSTONE, 4, BlockRedSandstone.EnumRedSandstoneVariant.SMOOTH.a()), "##", "##", '#', new ItemStack(Blocks.RED_SANDSTONE, 1, BlockRedSandstone.EnumRedSandstoneVariant.DEFAULT.a()));
++		craftingManager.registerShapedRecipe(new ItemStack(Blocks.SANDSTONE, 1, BlockSandStone.EnumSandstoneVariant.CHISELED.a()), "#", "#", '#', new ItemStack(Blocks.STONE_SLAB, 1, BlockDoubleStepAbstract.EnumStoneSlabVariant.SAND.a()));
++		craftingManager.registerShapedRecipe(new ItemStack(Blocks.RED_SANDSTONE, 1, BlockRedSandstone.EnumRedSandstoneVariant.CHISELED.a()), "#", "#", '#', new ItemStack(Blocks.STONE_SLAB2, 1, BlockDoubleStoneStepAbstract.EnumStoneSlab2Variant.RED_SANDSTONE.a()));
++		craftingManager.registerShapedRecipe(new ItemStack(Blocks.QUARTZ_BLOCK, 1, BlockQuartz.EnumQuartzVariant.CHISELED.a()), "#", "#", '#', new ItemStack(Blocks.STONE_SLAB, 1, BlockDoubleStepAbstract.EnumStoneSlabVariant.QUARTZ.a()));
++		craftingManager.registerShapedRecipe(new ItemStack(Blocks.QUARTZ_BLOCK, 2, BlockQuartz.EnumQuartzVariant.LINES_Y.a()), "#", "#", '#', new ItemStack(Blocks.QUARTZ_BLOCK, 1, BlockQuartz.EnumQuartzVariant.DEFAULT.a()));
++		craftingManager.registerShapedRecipe(new ItemStack(Blocks.STONEBRICK, 4), "##", "##", '#', new ItemStack(Blocks.STONE, 1, BlockStone.EnumStoneVariant.STONE.a()));
++		craftingManager.registerShapedRecipe(new ItemStack(Blocks.STONEBRICK, 1, BlockSmoothBrick.P), "#", "#", '#', new ItemStack(Blocks.STONE_SLAB, 1, BlockDoubleStepAbstract.EnumStoneSlabVariant.SMOOTHBRICK.a()));
++		craftingManager.registerShapelessRecipe(new ItemStack(Blocks.STONEBRICK, 1, BlockSmoothBrick.N), Blocks.STONEBRICK, Blocks.VINE);
++		craftingManager.registerShapelessRecipe(new ItemStack(Blocks.MOSSY_COBBLESTONE, 1), Blocks.COBBLESTONE, Blocks.VINE);
++		craftingManager.registerShapedRecipe(new ItemStack(Blocks.IRON_BARS, 16), "###", "###", '#', Items.IRON_INGOT);
++		craftingManager.registerShapedRecipe(new ItemStack(Blocks.GLASS_PANE, 16), "###", "###", '#', Blocks.GLASS);
++		craftingManager.registerShapedRecipe(new ItemStack(Blocks.REDSTONE_LAMP, 1), " R ", "RGR", " R ", 'R', Items.REDSTONE, 'G', Blocks.GLOWSTONE);
++		craftingManager.registerShapedRecipe(new ItemStack(Blocks.BEACON, 1), "GGG", "GSG", "OOO", 'G', Blocks.GLASS, 'S', Items.NETHER_STAR, 'O', Blocks.OBSIDIAN);
++		craftingManager.registerShapedRecipe(new ItemStack(Blocks.NETHER_BRICK, 1), "NN", "NN", 'N', Items.NETHERBRICK);
++		craftingManager.registerShapedRecipe(new ItemStack(Blocks.DIRT, 4, BlockDirt.EnumDirtVariant.COARSE_DIRT.a()), "DG", "GD", 'D', new ItemStack(Blocks.DIRT, 1, BlockDirt.EnumDirtVariant.DIRT.a()), 'G', Blocks.GRAVEL);
++		craftingManager.registerShapedRecipe(new ItemStack(Blocks.PRISMARINE, 1, BlockPrismarine.b), "SS", "SS", 'S', Items.PRISMARINE_SHARD);
++		craftingManager.registerShapedRecipe(new ItemStack(Blocks.PRISMARINE, 1, BlockPrismarine.N), "SSS", "SSS", "SSS", 'S', Items.PRISMARINE_SHARD);
++		craftingManager.registerShapedRecipe(new ItemStack(Blocks.PRISMARINE, 1, BlockPrismarine.O), "SSS", "SIS", "SSS", 'S', Items.PRISMARINE_SHARD, 'I', new ItemStack(Items.DYE, 1, EnumColor.BLACK.getInvColorIndex()));
++		craftingManager.registerShapedRecipe(new ItemStack(Blocks.SEA_LANTERN, 1, 0), "SCS", "CCC", "SCS", 'S', Items.PRISMARINE_SHARD, 'C', Items.PRISMARINE_CRYSTALS);
++	}
++}
++
+diff --git a/src/main/java/org/potionspigot/PotionSpigot.java b/src/main/java/org/potionspigot/PotionSpigot.java
+new file mode 100644
+index 00000000..bfd5963a
+--- /dev/null
++++ b/src/main/java/org/potionspigot/PotionSpigot.java
+@@ -0,0 +1,58 @@
++package org.potionspigot;
++
++import org.potionspigot.handler.MovementHandler;
++import org.potionspigot.command.KnockbackCommand;
++import org.potionspigot.handler.PacketHandler;
++
++import java.util.HashMap;
++import java.util.HashSet;
++import java.util.Map;
++import java.util.Set;
++
++import net.minecraft.server.MinecraftServer;
++
++import org.bukkit.command.Command;
++
++public enum PotionSpigot {
++
++	INSTANCE;
++
++    private PotionSpigotConfig config;
++    private Set<PacketHandler> packetHandlers = new HashSet<>();
++    private Set<MovementHandler> movementHandlers = new HashSet<>();
++
++    public PotionSpigotConfig getConfig() {
++        return this.config;
++    }
++
++    public Set<PacketHandler> getPacketHandlers() {
++        return this.packetHandlers;
++    }
++
++    public Set<MovementHandler> getMovementHandlers() {
++        return this.movementHandlers;
++    }
++
++    public void setConfig(PotionSpigotConfig config) {
++        this.config = config;
++    }
++
++	public void addPacketHandler(PacketHandler handler) {
++		this.packetHandlers.add(handler);
++	}
++
++	public void addMovementHandler(MovementHandler handler) {
++		this.movementHandlers.add(handler);
++	}
++
++	public void registerCommands() {
++		Map<String, Command> commands = new HashMap<>();
++
++		commands.put("knockback", new KnockbackCommand());
++
++		for (Map.Entry<String, Command> entry : commands.entrySet()) {
++			MinecraftServer.getServer().server.getCommandMap().register(entry.getKey(), "Spigot", entry.getValue());
++		}
++	}
++
++}
+diff --git a/src/main/java/org/potionspigot/PotionSpigotConfig.java b/src/main/java/org/potionspigot/PotionSpigotConfig.java
+new file mode 100644
+index 00000000..0576a46d
+--- /dev/null
++++ b/src/main/java/org/potionspigot/PotionSpigotConfig.java
+@@ -0,0 +1,306 @@
++package org.potionspigot;
++
++import com.google.common.base.Throwables;
++
++import java.io.File;
++import java.io.IOException;
++import java.io.InputStream;
++import java.util.*;
++import java.util.logging.Level;
++
++
++import org.potionspigot.knockback.CraftKnockbackProfile;
++import org.potionspigot.knockback.KnockbackProfile;
++
++import org.bukkit.Bukkit;
++import org.bukkit.configuration.InvalidConfigurationException;
++import org.bukkit.configuration.file.YamlConfiguration;
++
++public class PotionSpigotConfig {
++
++    private static final String HEADER = "This is the main configuration file for PotionSpigot.\n"
++                                         + "Modify with caution, and make sure you know what you are doing.\n";
++
++    private File configFile;
++    private YamlConfiguration config;
++
++    private KnockbackProfile currentKb;
++    private Set<KnockbackProfile> kbProfiles = new HashSet<>();
++
++    private boolean hidePlayersFromTab;
++    private boolean firePlayerMoveEvent;
++    private boolean fireLeftClickAir;
++    private boolean fireLeftClickBlock;
++    private boolean entityActivation;
++    private boolean invalidArmAnimationKick;
++    private boolean mobAIEnabled;
++    private boolean baseVersionEnabled;
++    private boolean doChunkUnload;
++    private boolean blockOperations;
++    private boolean disableJoinMessage;
++    private boolean disableLeaveMessage;
++
++    public PotionSpigotConfig() {
++        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
++        InputStream is = classLoader.getResourceAsStream("version.properties");
++        Properties prop = new Properties();
++
++        try {
++            prop.load(is);
++
++            PotionSpigotBridge.version = (String) prop.getOrDefault("version", "Unknown");
++        } catch (IOException io) {
++            io.printStackTrace();
++        } finally {
++            if (is != null) {
++                try {
++                    is.close();
++                }
++                catch (IOException e) {
++                    e.printStackTrace();
++                }
++            }
++        }
++
++        this.configFile = new File("potionspigot.yml");
++        this.config = new YamlConfiguration();
++
++        try {
++            config.load(this.configFile);
++        } catch (IOException ignored) {
++        } catch (InvalidConfigurationException ex) {
++            Bukkit.getLogger().log(Level.SEVERE, "Could not load potionspigot.yml, please correct your syntax errors", ex);
++            throw Throwables.propagate(ex);
++        }
++
++        this.config.options().header(PotionSpigotConfig.HEADER);
++        this.config.options().copyDefaults(true);
++
++        this.loadConfig();
++    }
++
++    private void loadConfig() {
++        final KnockbackProfile defaultProfile = new CraftKnockbackProfile("Default");
++
++        this.kbProfiles = new HashSet<>();
++        this.kbProfiles.add(defaultProfile);
++
++        for (String key : this.getKeys("knockback.profiles")) {
++            final String path = "knockback.profiles." + key;
++            CraftKnockbackProfile profile = (CraftKnockbackProfile) getKbProfileByName(key);
++
++            if (profile == null) {
++                profile = new CraftKnockbackProfile(key);
++                this.kbProfiles.add(profile);
++            }
++
++            profile.setFriction(this.getDouble(path + ".friction", 2.0D));
++            profile.setHorizontal(this.getDouble(path + ".horizontal", 0.35D));
++            profile.setVertical(this.getDouble(path + ".vertical", 0.35D));
++            profile.setVerticalLimit(this.getDouble(path + ".vertical-limit", 0.4D));
++        }
++
++        this.currentKb = this.getKbProfileByName(this.getString("knockback.current", "default"));
++
++        if (this.currentKb == null) {
++            this.currentKb = defaultProfile;
++        }
++
++        this.hidePlayersFromTab = this.getBoolean("hide-players-from-tab", true);
++        this.firePlayerMoveEvent = this.getBoolean("fire-player-move-event", false);
++        this.fireLeftClickAir = this.getBoolean("fire-left-click-air", false);
++        this.fireLeftClickBlock = this.getBoolean("fire-left-click-block", false);
++        this.entityActivation = this.getBoolean("entity-activation", false);
++        this.invalidArmAnimationKick = this.getBoolean("invalid-arm-animation-kick", false);
++        this.mobAIEnabled = this.getBoolean("mob-ai", true);
++        this.baseVersionEnabled = this.getBoolean("1-8-enabled", false);
++        this.doChunkUnload = this.getBoolean("do-chunk-unload", true);
++        this.blockOperations = this.getBoolean("block-operations", false);
++        this.disableJoinMessage = this.getBoolean("disable-join-message", true);
++        this.disableLeaveMessage = this.getBoolean("disable-leave-message", true);
++
++        PotionSpigotBridge.disableOpPermissions = this.getBoolean("disable-op", true);
++
++        try {
++            this.config.save(this.configFile);
++        } catch (IOException ex) {
++            Bukkit.getLogger().log(Level.SEVERE, "Could not save " + this.configFile, ex);
++        }
++    }
++
++    public boolean isHidePlayersFromTab() {
++        return this.hidePlayersFromTab;
++    }
++
++    public void setHidePlayersFromTab(boolean hidePlayersFromTab) {
++        this.hidePlayersFromTab = hidePlayersFromTab;
++    }
++
++    public boolean isFirePlayerMoveEvent() {
++        return this.firePlayerMoveEvent;
++    }
++
++    public void setFirePlayerMoveEvent(boolean firePlayerMoveEvent) {
++        this.firePlayerMoveEvent = firePlayerMoveEvent;
++    }
++
++    public boolean isFireLeftClickAir() {
++        return this.fireLeftClickAir;
++    }
++
++    public void setFireLeftClickAir(boolean fireLeftClickAir) {
++        this.fireLeftClickAir = fireLeftClickAir;
++    }
++
++    public boolean isFireLeftClickBlock() {
++        return this.fireLeftClickBlock;
++    }
++
++    public void setFireLeftClickBlock(boolean fireLeftClickBlock) {
++        this.fireLeftClickBlock = fireLeftClickBlock;
++    }
++
++    public boolean isEntityActivation() {
++        return this.entityActivation;
++    }
++
++    public void setEntityActivation(boolean entityActivation) {
++        this.entityActivation = entityActivation;
++    }
++
++    public boolean isInvalidArmAnimationKick() {
++        return this.invalidArmAnimationKick;
++    }
++
++    public void setInvalidArmAnimationKick(boolean invalidArmAnimationKick) {
++        this.invalidArmAnimationKick = invalidArmAnimationKick;
++    }
++
++    public boolean isMobAIEnabled() {
++        return this.mobAIEnabled;
++    }
++
++    public void setMobAIEnabled(boolean mobAIEnabled) {
++        this.mobAIEnabled = mobAIEnabled;
++    }
++
++    public boolean isBaseVersionEnabled() {
++        return this.baseVersionEnabled;
++    }
++
++    public void setBaseVersionEnabled(boolean baseVersionEnabled) {
++        this.baseVersionEnabled = baseVersionEnabled;
++    }
++
++    public boolean isDoChunkUnload() {
++        return this.doChunkUnload;
++    }
++
++    public void setDoChunkUnload(boolean doChunkUnload) {
++        this.doChunkUnload = doChunkUnload;
++    }
++
++    public boolean isBlockOperations() {
++        return this.blockOperations;
++    }
++
++    public void setBlockOperations(boolean blockOperations) {
++        this.blockOperations = blockOperations;
++    }
++
++    public boolean isDisableJoinMessage() {
++        return this.disableJoinMessage;
++    }
++
++    public void setDisableJoinMessage(boolean disableJoinMessage) {
++        this.disableJoinMessage = disableJoinMessage;
++    }
++
++    public boolean isDisableLeaveMessage() {
++        return this.disableLeaveMessage;
++    }
++
++    public void setDisableLeaveMessage(boolean disableLeaveMessage) {
++        this.disableLeaveMessage = disableLeaveMessage;
++    }
++
++    public KnockbackProfile getCurrentKb() {
++        return this.currentKb;
++    }
++
++    public void setCurrentKb(KnockbackProfile kb) {
++        this.currentKb = kb;
++    }
++
++    public KnockbackProfile getKbProfileByName(String name) {
++        for (KnockbackProfile profile : this.kbProfiles) {
++            if (profile.getName().equalsIgnoreCase(name)) {
++                return profile;
++            }
++        }
++
++        return null;
++    }
++
++    public Set<KnockbackProfile> getKbProfiles() {
++        return this.kbProfiles;
++    }
++
++
++    public void save() {
++        try {
++            this.config.save(this.configFile);
++        } catch (Exception e) {
++            e.printStackTrace();
++        }
++    }
++
++    public void set(String path, Object val) {
++        this.config.set(path, val);
++
++        try {
++            this.config.save(this.configFile);
++        } catch (IOException e) {
++            e.printStackTrace();
++        }
++    }
++
++    public Set<String> getKeys(String path) {
++        if (!this.config.isConfigurationSection(path)) {
++            this.config.createSection(path);
++            return new HashSet<>();
++        }
++
++        return this.config.getConfigurationSection(path).getKeys(false);
++    }
++
++    public boolean getBoolean(String path, boolean def) {
++        this.config.addDefault(path, def);
++        return this.config.getBoolean(path, this.config.getBoolean(path));
++    }
++
++    public double getDouble(String path, double def) {
++        this.config.addDefault(path, def);
++        return this.config.getDouble(path, this.config.getDouble(path));
++    }
++
++    public float getFloat(String path, float def) {
++        return (float) this.getDouble(path, (double) def);
++    }
++
++    public int getInt(String path, int def) {
++        this.config.addDefault(path, def);
++        return config.getInt(path, this.config.getInt(path));
++    }
++
++    public <T> List getList(String path, T def) {
++        this.config.addDefault(path, def);
++        return this.config.getList(path, this.config.getList(path));
++    }
++
++    public String getString(String path, String def) {
++        this.config.addDefault(path, def);
++        return this.config.getString(path, this.config.getString(path));
++    }
++
++}
+diff --git a/src/main/java/org/potionspigot/chunk/CraftFakeMultiBlockChange.java b/src/main/java/org/potionspigot/chunk/CraftFakeMultiBlockChange.java
+new file mode 100644
+index 00000000..7cbad88c
+--- /dev/null
++++ b/src/main/java/org/potionspigot/chunk/CraftFakeMultiBlockChange.java
+@@ -0,0 +1,19 @@
++package org.potionspigot.chunk;
++
++import net.minecraft.server.PacketPlayOutMultiBlockChange;
++import org.bukkit.craftbukkit.entity.CraftPlayer;
++import org.bukkit.entity.Player;
++
++public class CraftFakeMultiBlockChange implements FakeMultiBlockChange {
++
++	private final PacketPlayOutMultiBlockChange packet;
++
++	public CraftFakeMultiBlockChange(PacketPlayOutMultiBlockChange packet) {
++		this.packet = packet;
++	}
++
++	@Override
++	public void sendTo(Player player) {
++		((CraftPlayer) player).getHandle().playerConnection.sendPacket(this.packet);
++	}
++}
+diff --git a/src/main/java/org/potionspigot/command/KnockbackCommand.java b/src/main/java/org/potionspigot/command/KnockbackCommand.java
+new file mode 100644
+index 00000000..f793cbf9
+--- /dev/null
++++ b/src/main/java/org/potionspigot/command/KnockbackCommand.java
+@@ -0,0 +1,271 @@
++package org.potionspigot.command;
++
++import org.potionspigot.PotionSpigot;
++import org.potionspigot.knockback.CraftKnockbackProfile;
++import org.potionspigot.knockback.KnockbackProfile;
++
++import java.util.ArrayList;
++import java.util.Collections;
++import java.util.List;
++
++import org.apache.commons.lang.StringUtils;
++import org.apache.commons.lang.math.NumberUtils;
++
++import org.bukkit.ChatColor;
++import org.bukkit.command.Command;
++import org.bukkit.command.CommandSender;
++
++public class KnockbackCommand extends Command {
++
++    public KnockbackCommand() {
++        super("knockback");
++
++        this.setAliases(Collections.singletonList("kb"));
++        this.setUsage(StringUtils.join(new String[]{
++                ChatColor.GOLD + "Knockback commands:",
++                ChatColor.YELLOW + "/kb list" + ChatColor.GRAY + " - " + ChatColor.GREEN + "List all profiles",
++                ChatColor.YELLOW + "/kb create <name>" + ChatColor.GRAY + " - " + ChatColor.GREEN + "Create new profile",
++                ChatColor.YELLOW + "/kb delete <name>" + ChatColor.GRAY + " - " + ChatColor.GREEN + "Delete a profile",
++                ChatColor.YELLOW + "/kb load <name>" + ChatColor.GRAY + " - " + ChatColor.GREEN + "Load existing profile",
++                ChatColor.YELLOW + "/kb friction <name> <double>" + ChatColor.GRAY + " - " + ChatColor.GREEN + "Set friction",
++                ChatColor.YELLOW + "/kb horizontal <name> <double>" + ChatColor.GRAY + " - " + ChatColor.GREEN + "Set horizontal",
++                ChatColor.YELLOW + "/kb vertical <name> <double>" + ChatColor.GRAY + " - " + ChatColor.GREEN + "Set vertical",
++                ChatColor.YELLOW + "/kb extrahorizontal <name> <double>" + ChatColor.GRAY + " - " + ChatColor.GREEN + "Set extra horizontal",
++                ChatColor.YELLOW + "/kb extravertical <name> <double>" + ChatColor.GRAY + " - " + ChatColor.GREEN + "Set extra vertical",
++                ChatColor.YELLOW + "/kb limit <name> <double>" + ChatColor.GRAY + " - " + ChatColor.GREEN + "Set vertical limit"
++        }, "\n"));
++    }
++
++    @Override
++    public boolean execute(CommandSender sender, String alias, String[] args) {
++        if (!sender.isOp()) {
++            sender.sendMessage(ChatColor.RED + "Unknown command.");
++            return true;
++        }
++
++        if (args.length == 0) {
++            sender.sendMessage(usageMessage);
++            return true;
++        }
++
++        switch (args[0].toLowerCase()) {
++            case "list": {
++                List<String> messages = new ArrayList<>();
++
++                for (KnockbackProfile profile : PotionSpigot.INSTANCE.getConfig().getKbProfiles()) {
++                    boolean current = PotionSpigot.INSTANCE.getConfig().getCurrentKb().getName().equals(profile.getName());
++
++                    messages.add((current ? ChatColor.GRAY + "-> " : "") + ChatColor.GOLD + profile.getName());
++
++                    for (String value : profile.getValues()) {
++                        messages.add(ChatColor.GRAY + " * " + value);
++                    }
++                }
++
++                sender.sendMessage(ChatColor.GOLD + "Knockback profiles:");
++                sender.sendMessage(StringUtils.join(messages, "\n"));
++            }
++            break;
++            case "create": {
++                if (args.length > 1) {
++                    String name = args[1];
++
++                    for (KnockbackProfile profile : PotionSpigot.INSTANCE.getConfig().getKbProfiles()) {
++                        if (profile.getName().equalsIgnoreCase(name)) {
++                            sender.sendMessage(ChatColor.RED + "A knockback profile with that name already exists.");
++                            return true;
++                        }
++                    }
++
++                    CraftKnockbackProfile profile = new CraftKnockbackProfile(name);
++
++                    profile.save();
++
++                    PotionSpigot.INSTANCE.getConfig().getKbProfiles().add(profile);
++
++                    sender.sendMessage(ChatColor.GOLD + "You created a new profile " + ChatColor.GREEN + name + ChatColor.GOLD + ".");
++                } else {
++                    sender.sendMessage(ChatColor.RED + "Usage: /kb create <name>");
++                }
++            }
++            break;
++            case "delete": {
++                if (args.length > 1) {
++                    final String name = args[1];
++
++                    if (PotionSpigot.INSTANCE.getConfig().getCurrentKb().getName().equalsIgnoreCase(name)) {
++                        sender.sendMessage(ChatColor.RED + "You cannot delete the profile that is being used.");
++                        return true;
++                    } else {
++                        if (PotionSpigot.INSTANCE.getConfig().getKbProfiles().removeIf(profile -> profile.getName().equalsIgnoreCase(name))) {
++                            PotionSpigot.INSTANCE.getConfig().set("knockback.profiles." + name, null);
++                            sender.sendMessage(ChatColor.GOLD + "You deleted the profile " + ChatColor.GREEN + name + ChatColor.GOLD + ".");
++                        } else {
++                            sender.sendMessage(ChatColor.RED + "A profile with that name could not be found.");
++                        }
++
++                        return true;
++                    }
++                } else {
++                    sender.sendMessage(ChatColor.RED + "Usage: /kb delete <name>");
++                }
++            }
++            break;
++            case "load": {
++                if (args.length > 1) {
++                    KnockbackProfile profile = PotionSpigot.INSTANCE.getConfig().getKbProfileByName(args[1]);
++
++                    if (profile == null) {
++                        sender.sendMessage(ChatColor.RED + "A profile with that name could not be found.");
++                        return true;
++                    }
++
++                    PotionSpigot.INSTANCE.getConfig().setCurrentKb(profile);
++                    PotionSpigot.INSTANCE.getConfig().set("knockback.current", profile.getName());
++                    PotionSpigot.INSTANCE.getConfig().save();
++
++                    sender.sendMessage(ChatColor.GOLD + "You loaded the profile " + ChatColor.GREEN + profile.getName() + ChatColor.GOLD + ".");
++                    return true;
++                }
++            }
++            case "friction": {
++                if (args.length == 3 && NumberUtils.isNumber(args[2])) {
++                    KnockbackProfile profile = PotionSpigot.INSTANCE.getConfig().getKbProfileByName(args[1]);
++
++                    if (profile == null) {
++                        sender.sendMessage(ChatColor.RED + "A profile with that name could not be found.");
++                        return true;
++                    }
++
++                    profile.setFriction(Double.parseDouble(args[2]));
++                    profile.save();
++
++                    sender.sendMessage(ChatColor.GOLD + "You have updated " + ChatColor.GREEN + profile.getName() + ChatColor.GOLD + "'s values to:");
++
++                    for (String value : profile.getValues()) {
++                        sender.sendMessage(ChatColor.GRAY + "* " + value);
++                    }
++                } else {
++                    sender.sendMessage(ChatColor.RED + "Wrong syntax.");
++                }
++            }
++            break;
++            case "horizontal": {
++                if (args.length == 3 && NumberUtils.isNumber(args[2])) {
++                    KnockbackProfile profile = PotionSpigot.INSTANCE.getConfig().getKbProfileByName(args[1]);
++
++                    if (profile == null) {
++                        sender.sendMessage(ChatColor.RED + "A profile with that name could not be found.");
++                        return true;
++                    }
++
++                    profile.setHorizontal(Double.parseDouble(args[2]));
++                    profile.save();
++
++                    sender.sendMessage(ChatColor.GOLD + "You have updated " + ChatColor.GREEN + profile.getName() + ChatColor.GOLD + "'s values to:");
++
++                    for (String value : profile.getValues()) {
++                        sender.sendMessage(ChatColor.GRAY + "* " + value);
++                    }
++                } else {
++                    sender.sendMessage(ChatColor.RED + "Wrong syntax.");
++                }
++            }
++            break;
++            case "vertical": {
++                if (args.length == 3 && NumberUtils.isNumber(args[2])) {
++                    KnockbackProfile profile = PotionSpigot.INSTANCE.getConfig().getKbProfileByName(args[1]);
++
++                    if (profile == null) {
++                        sender.sendMessage(ChatColor.RED + "A profile with that name could not be found.");
++                        return true;
++                    }
++
++                    profile.setVertical(Double.parseDouble(args[2]));
++                    profile.save();
++
++                    sender.sendMessage(ChatColor.GOLD + "You have updated " + ChatColor.GREEN + profile.getName() + ChatColor.GOLD + "'s values to:");
++
++                    for (String value : profile.getValues()) {
++                        sender.sendMessage(ChatColor.GRAY + "* " + value);
++                    }
++                } else {
++                    sender.sendMessage(ChatColor.RED + "Wrong syntax.");
++                }
++            }
++            break;
++            case "extrahorizontal": {
++                if (args.length == 3 && NumberUtils.isNumber(args[2])) {
++                    KnockbackProfile profile = PotionSpigot.INSTANCE.getConfig().getKbProfileByName(args[1]);
++
++                    if (profile == null) {
++                        sender.sendMessage(ChatColor.RED + "A profile with that name could not be found.");
++                        return true;
++                    }
++
++                    profile.setExtraHorizontal(Double.parseDouble(args[2]));
++                    profile.save();
++
++                    sender.sendMessage(ChatColor.GOLD + "You have updated " + ChatColor.GREEN + profile.getName() + ChatColor.GOLD + "'s values to:");
++
++                    for (String value : profile.getValues()) {
++                        sender.sendMessage(ChatColor.GRAY + "* " + value);
++                    }
++                } else {
++                    sender.sendMessage(ChatColor.RED + "Wrong syntax.");
++                }
++            }
++            break;
++            case "extravertical": {
++                if (args.length == 3 && NumberUtils.isNumber(args[2])) {
++                    KnockbackProfile profile = PotionSpigot.INSTANCE.getConfig().getKbProfileByName(args[1]);
++
++                    if (profile == null) {
++                        sender.sendMessage(ChatColor.RED + "A profile with that name could not be found.");
++                        return true;
++                    }
++
++                    profile.setExtraVertical(Double.parseDouble(args[2]));
++                    profile.save();
++
++                    sender.sendMessage(ChatColor.GOLD + "You have updated " + ChatColor.GREEN + profile.getName() + ChatColor.GOLD + "'s values to:");
++
++                    for (String value : profile.getValues()) {
++                        sender.sendMessage(ChatColor.GRAY + "* " + value);
++                    }
++                } else {
++                    sender.sendMessage(ChatColor.RED + "Wrong syntax.");
++                }
++            }
++            break;
++            case "limit": {
++                if (args.length == 3 && NumberUtils.isNumber(args[2])) {
++                    KnockbackProfile profile = PotionSpigot.INSTANCE.getConfig().getKbProfileByName(args[1]);
++
++                    if (profile == null) {
++                        sender.sendMessage(ChatColor.RED + "A profile with that name could not be found.");
++                        return true;
++                    }
++
++                    profile.setVerticalLimit(Double.parseDouble(args[2]));
++                    profile.save();
++
++                    sender.sendMessage(ChatColor.GOLD + "You have updated " + ChatColor.GREEN + profile.getName() + ChatColor.GOLD + "'s values to:");
++
++                    for (String value : profile.getValues()) {
++                        sender.sendMessage(ChatColor.GRAY + "* " + value);
++                    }
++                } else {
++                    sender.sendMessage(ChatColor.RED + "Wrong syntax.");
++                }
++            }
++            break;
++            default: {
++                sender.sendMessage(usageMessage);
++            }
++        }
++
++        return true;
++    }
++
++}
+diff --git a/src/main/java/org/potionspigot/handler/MovementHandler.java b/src/main/java/org/potionspigot/handler/MovementHandler.java
+new file mode 100644
+index 00000000..74417a6f
+--- /dev/null
++++ b/src/main/java/org/potionspigot/handler/MovementHandler.java
+@@ -0,0 +1,13 @@
++package org.potionspigot.handler;
++
++import net.minecraft.server.PacketPlayInFlying;
++import org.bukkit.Location;
++import org.bukkit.entity.Player;
++
++public interface MovementHandler {
++
++	void handleUpdateLocation(Player player, Location to, Location from, PacketPlayInFlying packet);
++
++	void handleUpdateRotation(Player player, Location to, Location from, PacketPlayInFlying packet);
++
++}
+diff --git a/src/main/java/org/potionspigot/handler/PacketHandler.java b/src/main/java/org/potionspigot/handler/PacketHandler.java
+new file mode 100644
+index 00000000..09dc6236
+--- /dev/null
++++ b/src/main/java/org/potionspigot/handler/PacketHandler.java
+@@ -0,0 +1,12 @@
++package org.potionspigot.handler;
++
++import net.minecraft.server.Packet;
++import net.minecraft.server.PlayerConnection;
++
++public interface PacketHandler {
++
++    void handleReceivedPacket(PlayerConnection connection, Packet packet);
++
++    void handleSentPacket(PlayerConnection connection, Packet packet);
++
++}
+diff --git a/src/main/java/org/potionspigot/knockback/CraftKnockbackProfile.java b/src/main/java/org/potionspigot/knockback/CraftKnockbackProfile.java
+new file mode 100644
+index 00000000..e027298d
+--- /dev/null
++++ b/src/main/java/org/potionspigot/knockback/CraftKnockbackProfile.java
+@@ -0,0 +1,96 @@
++package org.potionspigot.knockback;
++
++import org.potionspigot.PotionSpigot;
++
++
++public class CraftKnockbackProfile implements KnockbackProfile {
++
++    private String name;
++    private double friction = 2.0D;
++    private double horizontal = 0.35D;
++    private double vertical = 0.35D;
++    private double verticalLimit = 0.4D;
++    private double extraHorizontal = 0.425D;
++    private double extraVertical = 0.085D;
++
++    public CraftKnockbackProfile(String name) {
++        this.name = name;
++    }
++
++    public String getName() {
++        return name;
++    }
++
++    @Override
++    public String[] getValues() {
++        return new String[]{
++                "Friction: " + this.friction,
++                "Horizontal: " + this.horizontal,
++                "Vertical: " + this.vertical,
++                "Vertical Limit: " + this.verticalLimit,
++                "Extra Horizontal: " + this.extraHorizontal,
++                "Extra Vertical: " + this.extraVertical,
++        };
++    }
++
++    public double getFriction() {
++        return this.friction;
++    }
++
++    public void setFriction(double friction) {
++        this.friction = friction;
++    }
++
++    public double getHorizontal() {
++        return this.horizontal;
++    }
++
++    public void setHorizontal(double horizontal) {
++        this.horizontal = horizontal;
++    }
++
++    public double getVertical() {
++        return this.vertical;
++    }
++
++    public void setVertical(double vertical) {
++        this.vertical = vertical;
++    }
++
++    public double getVerticalLimit() {
++        return this.verticalLimit;
++    }
++
++    public void setVerticalLimit(double verticalLimit) {
++        this.verticalLimit = verticalLimit;
++    }
++
++    public double getExtraHorizontal() {
++        return this.extraHorizontal;
++    }
++
++    public void setExtraHorizontal(double extraHorizontal) {
++        this.extraHorizontal = extraHorizontal;
++    }
++
++    public double getExtraVertical() {
++        return this.extraVertical;
++    }
++
++    public void setExtraVertical(double extraVertical) {
++        this.extraVertical = extraVertical;
++    }
++
++    public void save() {
++        final String path = "knockback.profiles." + this.name;
++
++        PotionSpigot.INSTANCE.getConfig().set(path + ".friction", this.friction);
++        PotionSpigot.INSTANCE.getConfig().set(path + ".horizontal", this.horizontal);
++        PotionSpigot.INSTANCE.getConfig().set(path + ".vertical", this.vertical);
++        PotionSpigot.INSTANCE.getConfig().set(path + ".vertical-limit", this.verticalLimit);
++        PotionSpigot.INSTANCE.getConfig().set(path + ".extra-horizontal", this.extraHorizontal);
++        PotionSpigot.INSTANCE.getConfig().set(path + ".extra-vertical", this.extraVertical);
++        PotionSpigot.INSTANCE.getConfig().save();
++    }
++
++}
+diff --git a/src/main/java/org/potionspigot/util/BooleanUtil.java b/src/main/java/org/potionspigot/util/BooleanUtil.java
+new file mode 100644
+index 00000000..f152cfc0
+--- /dev/null
++++ b/src/main/java/org/potionspigot/util/BooleanUtil.java
+@@ -0,0 +1,9 @@
++package org.potionspigot.util;
++
++public class BooleanUtil {
++
++    public static boolean isBoolean(String s) {
++        return s.equalsIgnoreCase("true") || s.equalsIgnoreCase("false");
++    }
++
++}
+diff --git a/src/main/java/org/potionspigot/util/CraftPotionUtil.java b/src/main/java/org/potionspigot/util/CraftPotionUtil.java
+new file mode 100644
+index 00000000..aa865564
+--- /dev/null
++++ b/src/main/java/org/potionspigot/util/CraftPotionUtil.java
+@@ -0,0 +1,25 @@
++package org.potionspigot.util;
++
++import net.minecraft.server.MobEffect;
++import org.bukkit.potion.PotionEffect;
++import org.bukkit.potion.PotionEffectType;
++
++public class CraftPotionUtil {
++
++    public static PotionEffect toBukkit(MobEffect effect) {
++        return new PotionEffect(PotionEffectType.getById(effect.getEffectId()), effect.getDuration(), effect.getAmplifier(), effect.isAmbient());
++    }
++
++    public static MobEffect toNMS(PotionEffect effect) {
++        return new MobEffect(effect.getType().getId(), effect.getDuration(), effect.getAmplifier(), effect.isAmbient(), effect.hasParticles());
++    }
++
++    public static MobEffect cloneWithDuration(MobEffect effect, int duration) {
++        return new MobEffect(effect.getEffectId(), duration, effect.getAmplifier(), effect.isAmbient(), effect.isShowParticles());
++    }
++
++    public static void extendDuration(MobEffect effect, int duration) {
++        effect.a(cloneWithDuration(effect, duration));
++    }
++
++}
+diff --git a/src/main/java/org/potionspigot/util/NotchUtil.java b/src/main/java/org/potionspigot/util/NotchUtil.java
+new file mode 100644
+index 00000000..3db8a685
+--- /dev/null
++++ b/src/main/java/org/potionspigot/util/NotchUtil.java
+@@ -0,0 +1,103 @@
++package org.potionspigot.util;
++
++import net.minecraft.server.EnumDirection;
++import net.minecraft.server.MathHelper;
++import net.minecraft.server.Vec3D;
++import net.minecraft.server.WorldSettings;
++
++public class NotchUtil {
++
++    // Stitched this together from old source lol
++    // NOTE: y is locY + headHeight
++    public static EnumDirection getDirection(float pitch, float yaw, double x, double y, double z, WorldSettings.EnumGamemode gamemode) {
++        Vec3D firstVector = new Vec3D(x, y, z);
++
++        float f3 = MathHelper.cos(-yaw * 0.017453292F - 3.1415927F);
++        float f4 = MathHelper.sin(-yaw * 0.017453292F - 3.1415927F);
++        float f5 = -MathHelper.cos(-pitch * 0.017453292F);
++        float f6 = MathHelper.sin(-pitch * 0.017453292F);
++        float f7 = f4 * f5;
++        float f8 = f3 * f5;
++        double d3 = gamemode == WorldSettings.EnumGamemode.CREATIVE ? 5.0D : 4.5D;
++
++        Vec3D secondVector = firstVector.add((double) f7 * d3, (double) f6 * d3, (double) f8 * d3);
++
++        int i = MathHelper.floor(secondVector.a);
++        int j = MathHelper.floor(secondVector.b);
++        int k = MathHelper.floor(secondVector.c);
++        int l = MathHelper.floor(firstVector.a);
++        int i1 = MathHelper.floor(firstVector.b);
++        int j1 = MathHelper.floor(firstVector.c);
++
++        boolean xDivide = true;
++        boolean yDivide = true;
++        boolean zDivide = true;
++        double startX = 999.0D;
++        double startY = 999.0D;
++        double startZ = 999.0D;
++        double xDifference = secondVector.a - firstVector.a;
++        double yDifference = secondVector.b - firstVector.b;
++        double zDifference = secondVector.c - firstVector.c;
++
++        if (i > l) {
++            startX = (double) l + 1.0D;
++        } else if (i < l) {
++            startX = (double) l + 0.0D;
++        } else {
++            xDivide = false;
++        }
++
++        if (j > i1) {
++            startY = (double) i1 + 1.0D;
++        } else if (j < i1) {
++            startY = (double) i1 + 0.0D;
++        } else {
++            yDivide = false;
++        }
++
++        if (k > j1) {
++            startZ = (double) j1 + 1.0D;
++        } else if (k < j1) {
++            startZ = (double) j1 + 0.0D;
++        } else {
++            zDivide = false;
++        }
++
++        if (xDivide) {
++            startX = (startX - firstVector.a) / xDifference;
++        }
++
++        if (yDivide) {
++            startY = (startY - firstVector.b) / yDifference;
++        }
++
++        if (zDivide) {
++            startZ = (startZ - firstVector.c) / zDifference;
++        }
++
++        if (startX == -0.0D) {
++            startX = -1.0E-4D;
++        }
++
++        if (startY == -0.0D) {
++            startY = -1.0E-4D;
++        }
++
++        if (startZ == -0.0D) {
++            startZ = -1.0E-4D;
++        }
++
++        EnumDirection enumDirection;
++
++        if (startX < startY && startX < startZ) {
++            enumDirection = i > l ? EnumDirection.WEST : EnumDirection.EAST;
++        } else if (startY < startZ) {
++            enumDirection = j > i1 ? EnumDirection.DOWN : EnumDirection.UP;
++        } else {
++            enumDirection = k > j1 ? EnumDirection.NORTH : EnumDirection.SOUTH;
++        }
++
++        return enumDirection;
++    }
++
++}
+diff --git a/src/main/java/org/potionspigot/util/OptimizedRemoveUtil.java b/src/main/java/org/potionspigot/util/OptimizedRemoveUtil.java
+new file mode 100644
+index 00000000..9ac75169
+--- /dev/null
++++ b/src/main/java/org/potionspigot/util/OptimizedRemoveUtil.java
+@@ -0,0 +1,47 @@
++package org.potionspigot.util;
++
++import java.util.List;
++import java.util.Set;
++
++public class OptimizedRemoveUtil {
++
++	public interface Marker {
++
++		boolean isNeedRemoval();
++
++		void markRemoval();
++
++	}
++
++	/**
++	 * An optimized remove all
++	 * From TacoSpigot https://github.com/TacoSpigot/TacoSpigot
++	 *
++	 * @param list     the list to remove from
++	 * @param toRemove what to remove
++	 * @param position the position to remove from
++	 * @param <T>      the type being removed
++	 * @return the new position
++	 */
++	public static <T extends Marker> int removeAll(List<T> list, Set<T> toRemove, int position) {
++		for (Marker marker : toRemove) {
++			marker.markRemoval();
++		}
++
++		int size = list.size();
++		int insertAt = 0;
++
++		for (int i = 0; i < size; i++) {
++			T element = list.get(i);
++			if (i == position) position = insertAt;
++			if (element != null && !element.isNeedRemoval()) {
++				list.set(insertAt++, element);
++			}
++		}
++
++		list.subList(insertAt, size).clear();
++
++		return position;
++	}
++
++}
+-- 
+2.20.1.windows.1
+

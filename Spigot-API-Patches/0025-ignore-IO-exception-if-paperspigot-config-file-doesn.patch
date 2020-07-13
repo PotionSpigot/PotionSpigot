@@ -1,0 +1,470 @@
+From 2adb2f8206770577e583b0a74fd5cf7e85059fcb Mon Sep 17 00:00:00 2001
+From: Eric <ehock7229@outlook.com>
+Date: Sun, 12 Jul 2020 20:34:12 -0400
+Subject: [PATCH] ignore IO exception if paperspigot config file doesn't exist.
+
+
+diff --git a/src/main/java/org/bukkit/event/world/PreChunkLoadEvent.java b/src/main/java/org/bukkit/event/world/PreChunkLoadEvent.java
+new file mode 100644
+index 00000000..d12a530d
+--- /dev/null
++++ b/src/main/java/org/bukkit/event/world/PreChunkLoadEvent.java
+@@ -0,0 +1,30 @@
++package org.bukkit.event.world;
++
++import org.bukkit.event.Cancellable;
++import org.bukkit.event.Event;
++import org.bukkit.event.HandlerList;
++
++/**
++ * Called when a World is unloaded
++ */
++public class PreChunkLoadEvent extends Event implements Cancellable {
++    private static final HandlerList handlers = new HandlerList();
++    private boolean isCancelled;
++
++    public boolean isCancelled() {
++        return this.isCancelled;
++    }
++
++    public void setCancelled(boolean cancel) {
++        this.isCancelled = cancel;
++    }
++
++    @Override
++    public HandlerList getHandlers() {
++        return handlers;
++    }
++
++    public static HandlerList getHandlerList() {
++        return handlers;
++    }
++}
+diff --git a/src/main/java/org/potionspigot/PotionSpigotBridge.java b/src/main/java/org/potionspigot/PotionSpigotBridge.java
+new file mode 100644
+index 00000000..0b704fe7
+--- /dev/null
++++ b/src/main/java/org/potionspigot/PotionSpigotBridge.java
+@@ -0,0 +1,11 @@
++package org.potionspigot;
++
++/**
++ * A hack to handle values in the api module from the server module
++ */
++public class PotionSpigotBridge {
++
++    public static String version = "Unknown";
++    public static Boolean disableOpPermissions = Boolean.FALSE;
++
++}
+diff --git a/src/main/java/org/potionspigot/chunk/FakeMultiBlockChange.java b/src/main/java/org/potionspigot/chunk/FakeMultiBlockChange.java
+new file mode 100644
+index 00000000..49b12c2a
+--- /dev/null
++++ b/src/main/java/org/potionspigot/chunk/FakeMultiBlockChange.java
+@@ -0,0 +1,9 @@
++package org.potionspigot.chunk;
++
++import org.bukkit.entity.Player;
++
++public interface FakeMultiBlockChange {
++
++	void sendTo(Player player);
++
++}
+diff --git a/src/main/java/org/potionspigot/event/inventory/PrepareAnvilRepairEvent.java b/src/main/java/org/potionspigot/event/inventory/PrepareAnvilRepairEvent.java
+new file mode 100644
+index 00000000..35639f3b
+--- /dev/null
++++ b/src/main/java/org/potionspigot/event/inventory/PrepareAnvilRepairEvent.java
+@@ -0,0 +1,78 @@
++package org.potionspigot.event.inventory;
++
++import org.bukkit.block.Block;
++import org.bukkit.entity.HumanEntity;
++import org.bukkit.event.Cancellable;
++import org.bukkit.event.HandlerList;
++import org.bukkit.event.inventory.InventoryEvent;
++import org.bukkit.inventory.InventoryView;
++import org.bukkit.inventory.ItemStack;
++
++/**
++ * @since 11/20/2017
++ */
++public class PrepareAnvilRepairEvent extends InventoryEvent implements Cancellable {
++
++	private static final HandlerList handlers;
++
++	static {
++		handlers = new HandlerList();
++	}
++
++	private final ItemStack first;
++	private final ItemStack second;
++	private final HumanEntity repairer;
++	private final Block anvil;
++	private boolean cancelled;
++	private ItemStack result;
++
++	public PrepareAnvilRepairEvent(final HumanEntity repairer, final InventoryView view, final Block anvil,
++	                               final ItemStack first, final ItemStack second, final ItemStack result) {
++		super(view);
++		this.first = first;
++		this.second = second;
++		this.anvil = anvil;
++		this.result = result;
++		this.repairer = repairer;
++	}
++
++	public static HandlerList getHandlerList() {
++		return PrepareAnvilRepairEvent.handlers;
++	}
++
++	public ItemStack getFirst() {
++		return this.first;
++	}
++
++	public ItemStack getSecond() {
++		return this.second;
++	}
++
++	public HumanEntity getRepairer() {
++		return this.repairer;
++	}
++
++	public Block getAnvil() {
++		return this.anvil;
++	}
++
++	public ItemStack getResult() {
++		return this.result;
++	}
++
++	public void setResult(final ItemStack result) {
++		this.result = result;
++	}
++
++	public boolean isCancelled() {
++		return this.cancelled;
++	}
++
++	public void setCancelled(final boolean cancel) {
++		this.cancelled = cancel;
++	}
++
++	public HandlerList getHandlers() {
++		return PrepareAnvilRepairEvent.handlers;
++	}
++}
+diff --git a/src/main/java/org/potionspigot/event/potion/PotionEffectAddEvent.java b/src/main/java/org/potionspigot/event/potion/PotionEffectAddEvent.java
+new file mode 100644
+index 00000000..8539f39d
+--- /dev/null
++++ b/src/main/java/org/potionspigot/event/potion/PotionEffectAddEvent.java
+@@ -0,0 +1,34 @@
++package org.potionspigot.event.potion;
++
++import org.bukkit.entity.LivingEntity;
++import org.bukkit.event.Cancellable;
++import org.bukkit.event.HandlerList;
++import org.bukkit.potion.PotionEffect;
++
++/**
++ * Called when a potion effect is applied to an entity, or an existing effect is extended or upgraded
++ */
++public class PotionEffectAddEvent extends PotionEffectEvent implements Cancellable {
++
++    private boolean cancelled;
++
++    private static final HandlerList HANDLER_LIST = new HandlerList();
++
++    public PotionEffectAddEvent(LivingEntity entity, PotionEffect effect) {
++        super(entity, effect);
++    }
++
++    @Override
++    public boolean isCancelled() {
++        return this.cancelled;
++    }
++
++    @Override
++    public void setCancelled(boolean cancel) {
++        this.cancelled = cancel;
++    }
++
++    @Override public HandlerList getHandlers() { return PotionEffectAddEvent.HANDLER_LIST; }
++
++    public static HandlerList getHandlerList() { return PotionEffectAddEvent.HANDLER_LIST; }
++}
+diff --git a/src/main/java/org/potionspigot/event/potion/PotionEffectEvent.java b/src/main/java/org/potionspigot/event/potion/PotionEffectEvent.java
+new file mode 100644
+index 00000000..6b9d5ada
+--- /dev/null
++++ b/src/main/java/org/potionspigot/event/potion/PotionEffectEvent.java
+@@ -0,0 +1,24 @@
++package org.potionspigot.event.potion;
++
++import org.bukkit.entity.LivingEntity;
++import org.bukkit.event.entity.EntityEvent;
++import org.bukkit.potion.PotionEffect;
++
++public abstract class PotionEffectEvent extends EntityEvent {
++
++    private final PotionEffect effect;
++
++    public PotionEffectEvent(LivingEntity what, PotionEffect effect) {
++        super(what);
++        this.effect = effect;
++    }
++
++    @Override
++    public LivingEntity getEntity() {
++        return (LivingEntity) super.getEntity();
++    }
++
++    public PotionEffect getEffect() {
++        return this.effect;
++    }
++}
+diff --git a/src/main/java/org/potionspigot/event/potion/PotionEffectExpireEvent.java b/src/main/java/org/potionspigot/event/potion/PotionEffectExpireEvent.java
+new file mode 100644
+index 00000000..eb26e34f
+--- /dev/null
++++ b/src/main/java/org/potionspigot/event/potion/PotionEffectExpireEvent.java
+@@ -0,0 +1,45 @@
++package org.potionspigot.event.potion;
++
++import org.bukkit.entity.LivingEntity;
++import org.bukkit.potion.PotionEffect;
++
++/**
++ * Called when a potion effect on an entity runs out. Cancelling the event extends
++ * the effect with a practically infinite duration. The new duration can also be set
++ * explicitly by calling {@link #setDuration}.
++ *
++ * Handlers of {@link PotionEffectRemoveEvent} will also receive this event.
++ */
++public class PotionEffectExpireEvent extends PotionEffectRemoveEvent {
++
++    private int duration = 0;
++
++    public PotionEffectExpireEvent(LivingEntity entity, PotionEffect effect) {
++        super(entity, effect);
++    }
++
++    /**
++     * Get the new duration for the potion effect. This is initially 0.
++     */
++    public int getDuration() {
++        return this.duration;
++    }
++
++    /**
++     * Set a new duration for the potion effect. Passing 0 to this method un-cancels
++     * the event, and passing anything above 0 cancels it.
++     */
++    public void setDuration(int duration) {
++        this.duration = Math.max(0, duration);
++    }
++
++    @Override
++    public boolean isCancelled() {
++        return this.duration > 0;
++    }
++
++    @Override
++    public void setCancelled(boolean cancel) {
++        this.duration = cancel ? Integer.MAX_VALUE : 0;
++    }
++}
+diff --git a/src/main/java/org/potionspigot/event/potion/PotionEffectExtendEvent.java b/src/main/java/org/potionspigot/event/potion/PotionEffectExtendEvent.java
+new file mode 100644
+index 00000000..c4712b06
+--- /dev/null
++++ b/src/main/java/org/potionspigot/event/potion/PotionEffectExtendEvent.java
+@@ -0,0 +1,26 @@
++package org.potionspigot.event.potion;
++
++import org.bukkit.entity.LivingEntity;
++import org.bukkit.potion.PotionEffect;
++
++/**
++ * Called when an entity's active potion effect is extended or upgraded.
++ *
++ * Handlers of {@link PotionEffectAddEvent} will also receive this event.
++ */
++public class PotionEffectExtendEvent extends PotionEffectAddEvent {
++
++    private final PotionEffect oldEffect;
++
++    public PotionEffectExtendEvent(LivingEntity entity, PotionEffect effect, PotionEffect oldEffect) {
++        super(entity, effect);
++        this.oldEffect = oldEffect;
++    }
++
++    /**
++     * Get the state of the potion effect prior to the change
++     */
++    public PotionEffect getOldEffect() {
++        return this.oldEffect;
++    }
++}
+diff --git a/src/main/java/org/potionspigot/event/potion/PotionEffectRemoveEvent.java b/src/main/java/org/potionspigot/event/potion/PotionEffectRemoveEvent.java
+new file mode 100644
+index 00000000..3974dd83
+--- /dev/null
++++ b/src/main/java/org/potionspigot/event/potion/PotionEffectRemoveEvent.java
+@@ -0,0 +1,35 @@
++package org.potionspigot.event.potion;
++
++import org.bukkit.entity.LivingEntity;
++import org.bukkit.event.Cancellable;
++import org.bukkit.event.HandlerList;
++import org.bukkit.potion.PotionEffect;
++
++/**
++ * Called when a potion effect is removed from an entity for whatever reason
++ */
++public class PotionEffectRemoveEvent extends PotionEffectEvent implements Cancellable {
++
++    private static final HandlerList HANDLER_LIST = new HandlerList();
++
++    private boolean cancelled = false;
++
++    public PotionEffectRemoveEvent(LivingEntity entity, PotionEffect effect) {
++        super(entity, effect);
++    }
++
++    @Override
++    public boolean isCancelled() {
++        return this.cancelled;
++    }
++
++    @Override
++    public void setCancelled(boolean cancel) {
++        this.cancelled = cancel;
++    }
++
++    @Override public HandlerList getHandlers() { return PotionEffectRemoveEvent.HANDLER_LIST; }
++
++    public static HandlerList getHandlerList() { return PotionEffectRemoveEvent.HANDLER_LIST; }
++
++}
+diff --git a/src/main/java/org/potionspigot/knockback/KnockbackProfile.java b/src/main/java/org/potionspigot/knockback/KnockbackProfile.java
+new file mode 100644
+index 00000000..3d965dcb
+--- /dev/null
++++ b/src/main/java/org/potionspigot/knockback/KnockbackProfile.java
+@@ -0,0 +1,35 @@
++package org.potionspigot.knockback;
++
++public interface KnockbackProfile {
++
++    String getName();
++
++    String[] getValues();
++
++    double getFriction();
++
++    void setFriction(double friction);
++
++    double getHorizontal();
++
++    void setHorizontal(double horizontal);
++
++    double getVertical();
++
++    void setVertical(double vertical);
++
++    double getVerticalLimit();
++
++    void setVerticalLimit(double verticalLimit);
++
++    double getExtraHorizontal();
++
++    void setExtraHorizontal(double extraHorizontal);
++
++    double getExtraVertical();
++
++    void setExtraVertical(double extraVertical);
++
++    void save();
++
++}
+diff --git a/src/main/java/org/potionspigot/util/DateUtil.java b/src/main/java/org/potionspigot/util/DateUtil.java
+new file mode 100644
+index 00000000..59f45b33
+--- /dev/null
++++ b/src/main/java/org/potionspigot/util/DateUtil.java
+@@ -0,0 +1,68 @@
++package org.potionspigot.util;
++
++import java.util.Calendar;
++import java.util.GregorianCalendar;
++
++public class DateUtil {
++    private static final int MAX_YEARS = 100000;
++
++    private DateUtil() {
++    }
++
++    private static int dateDiff(int type, Calendar fromDate, Calendar toDate, boolean future) {
++        int year = Calendar.YEAR;
++
++        int fromYear = fromDate.get(year);
++        int toYear = toDate.get(year);
++        if (Math.abs(fromYear - toYear) > DateUtil.MAX_YEARS) {
++            toDate.set(year, fromYear +
++                    (future ? DateUtil.MAX_YEARS : -DateUtil.MAX_YEARS));
++        }
++
++        int diff = 0;
++        long savedDate = fromDate.getTimeInMillis();
++        while ((future && !fromDate.after(toDate)) || (!future && !fromDate.before(toDate))) {
++            savedDate = fromDate.getTimeInMillis();
++            fromDate.add(type, future ? 1 : -1);
++            diff++;
++        }
++        diff--;
++        fromDate.setTimeInMillis(savedDate);
++        return diff;
++    }
++
++    public static String formatDateDiff(long date) {
++        Calendar c = new GregorianCalendar();
++        c.setTimeInMillis(date);
++        Calendar now = new GregorianCalendar();
++        return DateUtil.formatDateDiff(now, c);
++    }
++
++    private static String formatDateDiff(Calendar fromDate, Calendar toDate) {
++        boolean future = false;
++        if (toDate.equals(fromDate)) {
++            return "now";
++        }
++        if (toDate.after(fromDate)) {
++            future = true;
++        }
++        StringBuilder sb = new StringBuilder();
++        int[] types = new int[]{Calendar.YEAR, Calendar.MONTH, Calendar.DAY_OF_MONTH, Calendar.HOUR_OF_DAY, Calendar.MINUTE, Calendar.SECOND};
++        String[] names = new String[]{"year", "years", "month", "months", "day", "days", "hour", "hours", "minute", "minutes", "second", "seconds"};
++        int accuracy = 0;
++        for (int i = 0; i < types.length; i++) {
++            if (accuracy > 2) {
++                break;
++            }
++            int diff = dateDiff(types[i], fromDate, toDate, future);
++            if (diff > 0) {
++                accuracy++;
++                sb.append(" ").append(diff).append(" ").append(names[i * 2 + (diff > 1 ? 1 : 0)]);
++            }
++        }
++        if (sb.length() == 0) {
++            return "now";
++        }
++        return sb.toString().trim();
++    }
++}
+-- 
+2.20.1.windows.1
+
