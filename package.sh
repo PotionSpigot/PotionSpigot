@@ -5,7 +5,18 @@ VANILLA_JAR=work/$MINECRAFT_VERSION/$MINECRAFT_VERSION.jar
 
 VANILLA_URL="https://s3.amazonaws.com/Minecraft.Download/versions/$MINECRAFT_VERSION/minecraft_server.$MINECRAFT_VERSION.jar"
 
-SERVER_JAR=PotionSpigot-Server/target/$(ls PotionSpigot-Server/target | grep -P "^potionspigot-[\d\.]+-[\w\.]+(-SNAPSHOT)?.jar")
+# OS X grep does not support -P option
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  # check if gnu grep is installed and available to us through home brew
+  if [ ! -d "/usr/local/Cellar/grep" ]; then
+    echo "grep is not available, please install gnu grep via home brew with brew install grep."
+    exit 1;
+  fi
+
+  SERVER_JAR=PotionSpigot-Server/target/$(ls PotionSpigot-Server/target | ggrep -P "^potionspigot-[\d\.]+-[\w\.]+(-SNAPSHOT)?.jar")
+else
+  SERVER_JAR=PotionSpigot-Server/target/$(ls PotionSpigot-Server/target | grep -P "^potionspigot-[\d\.]+-[\w\.]+(-SNAPSHOT)?.jar")
+fi
 
 if [ ! -f "$SERVER_JAR" ]; then
     echo "Server Jar: $SERVER_JAR not found"

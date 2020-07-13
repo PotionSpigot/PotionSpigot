@@ -60,7 +60,12 @@ OUTPUT_JAR=$NAME.jar
 PATCH_FILE=$NAME.patch
 
 hash() {
-    echo "$(sha256sum $1 | sed -E "s/(\S+).*/\1/")"
+    # OS X has shasum -a 256
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+      echo "$(shasum -a 256 $1 | sed -E "s/(\S+).*/\1/")"
+    else
+        echo "$(sha256sum $1 | sed -E "s/(\S+).*/\1/")"
+    fi
 }
 
 echo "Computing Patch"
