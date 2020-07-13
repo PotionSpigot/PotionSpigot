@@ -5,7 +5,7 @@ VANILLA_JAR=work/$MINECRAFT_VERSION/$MINECRAFT_VERSION.jar
 
 VANILLA_URL="https://s3.amazonaws.com/Minecraft.Download/versions/$MINECRAFT_VERSION/minecraft_server.$MINECRAFT_VERSION.jar"
 
-SERVER_JAR=PotionSpigot-Server/target/$(ls PotionSpigot-Server/target | grep -P "^server-[\d\.]+-[\w\.]+(-SNAPSHOT)?.jar")
+SERVER_JAR=PotionSpigot-Server/target/$(ls PotionSpigot-Server/target | grep -P "^potionspigot-[\d\.]+-[\w\.]+(-SNAPSHOT)?.jar")
 
 if [ ! -f "$SERVER_JAR" ]; then
     echo "Server Jar: $SERVER_JAR not found"
