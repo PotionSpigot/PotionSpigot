@@ -1,0 +1,22 @@
+From f4755bc232a46a3851617d115390372f9e08345d Mon Sep 17 00:00:00 2001
+From: Eric Hocking <ehock7229@outlook.com>
+Date: Mon, 13 Jul 2020 08:49:54 -0400
+Subject: [PATCH] Don't disable op by default, should be prevented by plugins
+
+
+diff --git a/src/main/java/org/potionspigot/PotionSpigotConfig.java b/src/main/java/org/potionspigot/PotionSpigotConfig.java
+index 0576a46d..4a39547b 100644
+--- a/src/main/java/org/potionspigot/PotionSpigotConfig.java
++++ b/src/main/java/org/potionspigot/PotionSpigotConfig.java
+@@ -119,7 +119,7 @@ public class PotionSpigotConfig {
+         this.disableJoinMessage = this.getBoolean("disable-join-message", true);
+         this.disableLeaveMessage = this.getBoolean("disable-leave-message", true);
+ 
+-        PotionSpigotBridge.disableOpPermissions = this.getBoolean("disable-op", true);
++        PotionSpigotBridge.disableOpPermissions = this.getBoolean("disable-op", false);
+ 
+         try {
+             this.config.save(this.configFile);
+-- 
+2.21.0
+
