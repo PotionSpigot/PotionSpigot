@@ -1,0 +1,113 @@
+From 76f4a94cd0c09ef612158de4c33c0ff8aa99ae82 Mon Sep 17 00:00:00 2001
+From: Eric <ehock7229@outlook.com>
+Date: Sun, 12 Jul 2020 18:05:00 -0400
+Subject: [PATCH] add back antiXray
+
+
+diff --git a/pom.xml b/pom.xml
+index ace0cb12..037de7ba 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -75,6 +75,13 @@
+             <type>jar</type>
+             <scope>compile</scope>
+         </dependency>
++        <dependency>
++            <groupId>net.jafama</groupId>
++            <artifactId>jafama</artifactId>
++            <version>2.3.1</version>
++            <type>jar</type>
++            <scope>compile</scope>
++        </dependency>
+         <!-- testing -->
+         <dependency>
+             <groupId>junit</groupId>
+diff --git a/src/main/java/co/aikar/timings/SpigotTimings.java b/src/main/java/co/aikar/timings/SpigotTimings.java
+index 9d748102..82eec886 100644
+--- a/src/main/java/co/aikar/timings/SpigotTimings.java
++++ b/src/main/java/co/aikar/timings/SpigotTimings.java
+@@ -24,6 +24,9 @@ public final class SpigotTimings {
+     public static final Timing entityActivationCheckTimer = Timings.ofSafe("entityActivationCheck");
+     public static final Timing checkIfActiveTimer = Timings.ofSafe("checkIfActive");
+ 
++    public static final Timing antiXrayUpdateTimer = Timings.ofSafe("anti-xray - update");
++    public static final Timing antiXrayObfuscateTimer = Timings.ofSafe("anti-xray - obfuscate");
++
+     private SpigotTimings() {}
+ 
+     /**
+diff --git a/src/main/java/org/spigotmc/SpigotWorldConfig.java b/src/main/java/org/spigotmc/SpigotWorldConfig.java
+index a9628ba6..6e70c2fa 100644
+--- a/src/main/java/org/spigotmc/SpigotWorldConfig.java
++++ b/src/main/java/org/spigotmc/SpigotWorldConfig.java
+@@ -1,5 +1,6 @@
+ package org.spigotmc;
+ 
++import java.util.Arrays;
+ import java.util.List;
+ 
+ import org.bukkit.Bukkit;
+@@ -17,12 +18,22 @@ public class SpigotWorldConfig {
+         init();
+     }
+ 
++
+     public void init() {
+         this.verbose = getBoolean("verbose", true);
+ 
++        log( "-------- World Settings For [" + worldName + "] --------" );
+         SpigotConfig.readConfig(SpigotWorldConfig.class, this);
+     }
+ 
++    private void log(String s)
++    {
++        if ( verbose )
++        {
++            Bukkit.getLogger().info( s );
++        }
++    }
++
+     private void set(String path, Object val) {
+         config.set("world-settings.default." + path, val);
+     }
+@@ -182,9 +193,37 @@ public class SpigotWorldConfig {
+         arrowDespawnRate = getInt("arrow-despawn-rate", 1200);
+     }
+ 
++    public boolean antiXray;
+     public int engineMode;
+     public List<Integer> hiddenBlocks;
+     public List<Integer> replaceBlocks;
++    public AntiXray antiXrayInstance;
++    private void antiXray()
++    {
++        antiXray = getBoolean( "anti-xray.enabled", true );
++        log( "Anti X-Ray: " + antiXray );
++
++        engineMode = getInt( "anti-xray.engine-mode", 1 );
++        log( "\tEngine Mode: " + engineMode );
++
++        if ( SpigotConfig.version < 5 )
++        {
++            set( "anti-xray.blocks", null );
++        }
++        hiddenBlocks = getList( "anti-xray.hide-blocks", Arrays.asList( new Integer[]
++                {
++                        14, 15, 16, 21, 48, 49, 54, 56, 73, 74, 82, 129, 130
++                } ) );
++        log( "\tHidden Blocks: " + hiddenBlocks );
++
++        replaceBlocks = getList( "anti-xray.replace-blocks", Arrays.asList( new Integer[]
++                {
++                        1, 5
++                } ) );
++        log( "\tReplace Blocks: " + replaceBlocks );
++
++        antiXrayInstance = new AntiXray( this );
++    }
+ 
+     public boolean zombieAggressiveTowardsVillager;
+ 
+-- 
+2.20.1.windows.1
+

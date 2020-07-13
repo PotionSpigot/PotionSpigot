@@ -1,0 +1,22 @@
+From fcdcb7e246ffbe21e7de8ad84f07c15fdccf9157 Mon Sep 17 00:00:00 2001
+From: Eric <ehock7229@outlook.com>
+Date: Sun, 12 Jul 2020 19:45:16 -0400
+Subject: [PATCH] update lombok version
+
+
+diff --git a/pom.xml b/pom.xml
+index 037de7ba..2692927f 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -98,7 +98,7 @@
+         <dependency>
+             <groupId>org.projectlombok</groupId>
+             <artifactId>lombok</artifactId>
+-            <version>1.16.16</version>
++            <version>1.18.12</version>
+             <scope>provided</scope>
+         </dependency>
+     </dependencies>
+-- 
+2.20.1.windows.1
+
