@@ -1,0 +1,133 @@
+From b8ec3120697f24d6124d4a0e4be50c056b557b49 Mon Sep 17 00:00:00 2001
+From: Eric Hocking <ehock7229@outlook.com>
+Date: Wed, 30 Sep 2020 12:04:35 -0400
+Subject: [PATCH] TinyProtocol integration
+
+
+diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
+index 90bfaadd..e6186903 100644
+--- a/src/main/java/org/bukkit/Bukkit.java
++++ b/src/main/java/org/bukkit/Bukkit.java
+@@ -13,6 +13,7 @@ import java.util.UUID;
+ import java.util.logging.Logger;
+ 
+ import org.bukkit.Warning.WarningState;
++import org.bukkit.block.Biome;
+ import org.bukkit.command.CommandException;
+ import org.bukkit.command.CommandMap;
+ import org.bukkit.command.CommandSender;
+@@ -29,6 +30,7 @@ import org.bukkit.inventory.ItemStack;
+ import org.bukkit.inventory.Recipe;
+ import org.bukkit.map.MapView;
+ import org.bukkit.permissions.Permissible;
++import org.bukkit.plugin.Plugin;
+ import org.bukkit.plugin.PluginManager;
+ import org.bukkit.plugin.ServicesManager;
+ import org.bukkit.plugin.messaging.Messenger;
+@@ -42,6 +44,7 @@ import org.bukkit.generator.ChunkGenerator;
+ 
+ import org.bukkit.inventory.ItemFactory;
+ import org.bukkit.inventory.meta.ItemMeta;
++import org.potionspigot.protocol.TinyProtocol;
+ 
+ /**
+  * Represents the Bukkit core, for version and Server singleton handling
+@@ -1173,4 +1176,22 @@ public final class Bukkit {
+     {
+         return server.spigot();
+     }
++
++    // PotionSpigot start
++    public static ChatMessage createChatMessage(String msg, boolean keepNewLines) {
++        return server.createChatMessage(msg, keepNewLines);
++    }
++
++    public static double[] getRecentTps() {
++        return server.getRecentTps();
++    }
++
++    public static TinyProtocol getTinyProtocol(Plugin plugin) {
++        return server.getTinyProtocol(plugin);
++    }
++
++    public static void setBiomeBase(Biome from, Biome to, int plus) {
++        server.setBiomeBase(from, to, plus);
++    }
++    // PotionSpigot end
+ }
+diff --git a/src/main/java/org/bukkit/ChatMessage.java b/src/main/java/org/bukkit/ChatMessage.java
+new file mode 100644
+index 00000000..b7a1c3eb
+--- /dev/null
++++ b/src/main/java/org/bukkit/ChatMessage.java
+@@ -0,0 +1,7 @@
++package org.bukkit;
++
++import org.bukkit.entity.Player;
++
++public interface ChatMessage {
++    void sendTo(Player player);
++}
+diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
+index ca952177..5ddde44c 100644
+--- a/src/main/java/org/bukkit/Server.java
++++ b/src/main/java/org/bukkit/Server.java
+@@ -13,6 +13,7 @@ import java.util.UUID;
+ import java.util.logging.Logger;
+ 
+ import org.bukkit.Warning.WarningState;
++import org.bukkit.block.Biome;
+ import org.bukkit.command.CommandException;
+ import org.bukkit.command.CommandMap;
+ import org.bukkit.command.CommandSender;
+@@ -29,6 +30,7 @@ import org.bukkit.inventory.ItemStack;
+ import org.bukkit.inventory.Recipe;
+ import org.bukkit.map.MapView;
+ import org.bukkit.permissions.Permissible;
++import org.bukkit.plugin.Plugin;
+ import org.bukkit.plugin.PluginManager;
+ import org.bukkit.plugin.ServicesManager;
+ import org.bukkit.plugin.messaging.Messenger;
+@@ -43,6 +45,7 @@ import org.bukkit.generator.ChunkGenerator;
+ 
+ import org.bukkit.inventory.ItemFactory;
+ import org.bukkit.inventory.meta.ItemMeta;
++import org.potionspigot.protocol.TinyProtocol;
+ 
+ /**
+  * Represents a server implementation.
+@@ -1012,4 +1015,14 @@ public interface Server extends PluginMessageRecipient {
+     }
+ 
+     Spigot spigot();
++
++    // PotionSpigot start
++    ChatMessage createChatMessage(String msg, boolean keepNewlines);
++
++    double[] getRecentTps();
++
++    TinyProtocol getTinyProtocol(Plugin plugin);
++
++    void setBiomeBase(Biome from, Biome to, int plus);
++    // PotionSpigot end
+ }
+diff --git a/src/main/java/org/potionspigot/protocol/TinyProtocol.java b/src/main/java/org/potionspigot/protocol/TinyProtocol.java
+new file mode 100644
+index 00000000..c3877020
+--- /dev/null
++++ b/src/main/java/org/potionspigot/protocol/TinyProtocol.java
+@@ -0,0 +1,11 @@
++package org.potionspigot.protocol;
++
++import org.bukkit.entity.Player;
++
++public interface TinyProtocol {
++
++    void sendPacket(Player player, Object packet);
++
++    void setAllowConnections(boolean allowConnections);
++
++}
+-- 
+2.21.0
+
