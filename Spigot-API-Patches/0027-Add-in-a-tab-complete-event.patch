@@ -1,0 +1,108 @@
+From 07cca0b18b87a04ca12a4109171e6940d5a13bcf Mon Sep 17 00:00:00 2001
+From: Eric Hocking <ehock7229@outlook.com>
+Date: Wed, 11 Nov 2020 11:44:25 -0500
+Subject: [PATCH] Add in a tab complete event
+
+
+diff --git a/src/main/java/org/bukkit/command/SimpleCommandMap.java b/src/main/java/org/bukkit/command/SimpleCommandMap.java
+index 0d85ec96..253775c7 100644
+--- a/src/main/java/org/bukkit/command/SimpleCommandMap.java
++++ b/src/main/java/org/bukkit/command/SimpleCommandMap.java
+@@ -16,6 +16,7 @@ import org.bukkit.Location;
+ import org.bukkit.Server;
+ import org.bukkit.command.defaults.*;
+ import org.bukkit.entity.Player;
++import org.bukkit.event.command.TabCompleteEvent;
+ import org.bukkit.util.StringUtil;
+ import org.github.paperspigot.event.ServerExceptionEvent;
+ import org.github.paperspigot.exception.ServerCommandException;
+@@ -225,11 +226,17 @@ public class SimpleCommandMap implements CommandMap {
+             return null;
+         }
+ 
++
+         String argLine = cmdLine.substring(spaceIndex + 1, cmdLine.length());
+         String[] args = PATTERN_ON_SPACE.split(argLine, -1);
+ 
++        // PotionSpigot start
++        TabCompleteEvent event = new TabCompleteEvent(sender, commandName, args);
++        // PotionSpigot end
++
+         try {
+-            return target.tabComplete(sender, commandName, args, location); // PaperSpigot - add location argument
++            event.getSuggestions().addAll(target.tabComplete(sender, commandName, args, location)); // PotionSpigot - add to list of suggestions
++            //return target.tabComplete(sender, commandName, args, location); // PaperSpigot - add location argument
+         } catch (CommandException ex) {
+             throw ex;
+         } catch (Throwable ex) {
+@@ -237,6 +244,9 @@ public class SimpleCommandMap implements CommandMap {
+             server.getPluginManager().callEvent(new ServerExceptionEvent(new ServerTabCompleteException(msg, ex, target, sender, args))); // Paper
+             throw new CommandException(msg, ex);
+         }
++
++        this.server.getPluginManager().callEvent(event);
++        return event.getSuggestions();
+     }
+     // PaperSpigot end
+ 
+diff --git a/src/main/java/org/bukkit/event/command/TabCompleteEvent.java b/src/main/java/org/bukkit/event/command/TabCompleteEvent.java
+new file mode 100644
+index 00000000..c4e1723a
+--- /dev/null
++++ b/src/main/java/org/bukkit/event/command/TabCompleteEvent.java
+@@ -0,0 +1,52 @@
++package org.bukkit.event.command;
++
++import java.util.ArrayList;
++import java.util.List;
++import org.bukkit.command.CommandSender;
++import org.bukkit.event.Event;
++import org.bukkit.event.HandlerList;
++
++public class TabCompleteEvent extends Event {
++    private static final HandlerList handlers = new HandlerList();
++
++    private final CommandSender sender;
++    private final String command;
++    private final String[] args;
++    private List<String> suggestions;
++
++    public TabCompleteEvent(CommandSender sender, String command, String[] args)
++    {
++        this.sender = sender;
++        this.command = command;
++        this.args = args;
++        this.suggestions = new ArrayList<>();
++    }
++
++    public CommandSender getSender() {
++        return this.sender;
++    }
++
++    public String getCommand() {
++        return this.command;
++    }
++
++    public String[] getArgs() {
++        return this.args;
++    }
++
++    public List<String> getSuggestions() {
++        return this.suggestions;
++    }
++
++    public void setSuggestions(List<String> suggestions) {
++        this.suggestions = suggestions;
++    }
++
++    public HandlerList getHandlers() {
++        return handlers;
++    }
++
++    public static HandlerList getHandlerList() {
++        return handlers;
++    }
++}
+-- 
+2.21.0
+
