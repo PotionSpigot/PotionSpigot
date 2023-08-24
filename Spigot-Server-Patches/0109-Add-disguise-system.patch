@@ -1,0 +1,213 @@
+From 5f2142c0a00199c7a869454d83ef1a7467e25a12 Mon Sep 17 00:00:00 2001
+From: Eric <ehock7229@outlook.com>
+Date: Thu, 24 Aug 2023 10:10:03 -0400
+Subject: [PATCH] Add disguise system
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index 5d59dc2e..8080fdc5 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -17,17 +17,7 @@ import java.io.FileInputStream;
+ import java.io.FileNotFoundException;
+ import java.io.IOException;
+ import java.io.InputStreamReader;
+-import java.util.ArrayList;
+-import java.util.Arrays;
+-import java.util.Collections;
+-import java.util.HashSet;
+-import java.util.Iterator;
+-import java.util.LinkedHashMap;
+-import java.util.LinkedHashSet;
+-import java.util.List;
+-import java.util.Map;
+-import java.util.Set;
+-import java.util.UUID;
++import java.util.*;
+ import java.util.logging.Level;
+ import java.util.logging.Logger;
+ import java.util.regex.Pattern;
+@@ -166,6 +156,9 @@ public final class CraftServer implements Server {
+ 
+     // PotionSpigot start
+     private static TinyProtocol tinyProtocol;
++
++    private final Map<String, CraftPlayer> disguisedPlayers = new HashMap<>();
++
+     // PotionSpigot end
+ 
+     private final class BooleanWrapper {
+@@ -405,6 +398,22 @@ public final class CraftServer implements Server {
+         return this.playerView;
+     }
+ 
++    // PotionSpigot Start
++
++    @Override
++    public Map<String, CraftPlayer> getDisguisedPlayers() {
++        return this.disguisedPlayers;
++    }
++
++    @Override
++    public Player getDisguisedPlayer(String name) {
++        Validate.notNull(name, "Name cannot be null");
++
++        return this.disguisedPlayers.get(name);
++    }
++
++    // PotionSpigot End
++
+     @Override
+     @Deprecated
+     public Player getPlayer(final String name) {
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+index 3d3816b5..d3a86eb3 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+@@ -1,5 +1,6 @@
+ package org.bukkit.craftbukkit.entity;
+ 
++import net.minecraft.server.MinecraftServer;
+ import org.potionspigot.PotionSpigot;
+ import com.google.common.base.Preconditions;
+ import com.google.common.collect.ImmutableSet;
+@@ -117,6 +118,16 @@ import org.github.paperspigot.Title;
+ @DelegateDeserialization(CraftOfflinePlayer.class)
+ public class CraftPlayer extends CraftHumanEntity implements Player {
+ 
++	// PotionSpigot Start
++	private String disguisedName = null;
++
++	public GameProfile disguisedGameProfile = null;
++
++	private String originalListName = null;
++
++	private boolean ignoreXray = false;
++	// PotionSpigot End
++
+ 	private long firstPlayed = 0;
+ 	private long lastPlayed = 0;
+ 	private boolean hasPlayedBefore = false;
+@@ -338,6 +349,9 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+ 
+ 	@Override
+ 	public String getDisplayName() {
++		if (this.disguisedName != null) {
++			return this.disguisedName;
++		}
+ 		return getHandle().displayName;
+ 	}
+ 
+@@ -346,6 +360,109 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+ 		getHandle().displayName = name == null ? getName() : name;
+ 	}
+ 
++
++	// PotionSpigot Start
++
++	/**
++	 * Whether the player has xray detection ignored
++	 * @return true if xray detection is ignored
++	 */
++	public boolean ignoreXray() {
++		return this.ignoreXray;
++	}
++
++	/**
++	 * Sets if player xray detection should be ignored
++	 * @param ignoreXray ignore xray
++	 */
++	public void setIgnoreXray(boolean ignoreXray) {
++		this.ignoreXray = ignoreXray;
++	}
++
++	/**
++	 * The name of the disguised player or name of player if not disguised
++	 * @return name of the disguised player or name of player if not disguised
++	 */
++	public String getDisguisedName() {
++		if (this.disguisedName != null) {
++			return this.disguisedName;
++		}
++
++		return this.getName();
++	}
++
++	/**
++	 * Whether player is disguised
++	 * @return true if player is disguised
++	 */
++	public boolean isDisguised() {
++		return this.disguisedName != null;
++	}
++
++	/**
++	 * Disguise the player
++	 * @param name the name of the disguised player
++	 * @param texture the texture to use
++	 * @param textureSignature the texture signature
++	 */
++	public void disguise(String name, String texture, String textureSignature)
++	{
++		if (isDisguised()) {
++			throw new IllegalStateException("Player is already disguised");
++		}
++
++		if (server.getDisguisedPlayers().containsKey(name)) {
++			throw new IllegalStateException("Disguise name is already in use");
++		}
++
++		PacketPlayOutPlayerInfo removePacket = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, getHandle());
++		this.disguisedName = name;
++		this.disguisedGameProfile = new GameProfile(getUniqueId(), this.disguisedName);
++		this.disguisedGameProfile.getProperties().put("texture", new com.mojang.authlib.properties.Property("textures", texture, textureSignature));
++		this.originalListName = getPlayerListName();
++		setPlayerListName(this.disguisedName);
++		server.getDisguisedPlayers().put(this.disguisedName, this);
++		PacketPlayOutPlayerInfo addPacket = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, getHandle());
++
++		for (EntityPlayer player : MinecraftServer.getServer().getPlayerList().players) {
++			if (player.playerConnection == null) {
++				continue;
++			}
++
++			player.playerConnection.sendPacket(removePacket);
++			player.playerConnection.sendPacket(addPacket);
++		}
++	}
++
++	/**
++	 * Undisguise the player
++	 */
++	public void undisguise()
++	{
++		if (!isDisguised()) {
++			throw new IllegalStateException("Player is not disguised");
++		}
++
++		PacketPlayOutPlayerInfo removePacket = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, getHandle());
++		server.getDisguisedPlayers().remove(this.disguisedName);
++		setPlayerListName(this.originalListName);
++		this.disguisedName = null;
++		this.disguisedGameProfile = null;
++		this.originalListName = null;
++		PacketPlayOutPlayerInfo addPacket = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, getHandle());
++
++		for (EntityPlayer player : MinecraftServer.getServer().getPlayerList().players) {
++			if (player.playerConnection == null) {
++				continue;
++			}
++
++			player.playerConnection.sendPacket(removePacket);
++			player.playerConnection.sendPacket(addPacket);
++		}
++	}
++
++	// PotionSpigot End
++
+ 	@Override
+ 	public String getPlayerListName() {
+ 		return getHandle().listName == null ? getName() : CraftChatMessage.fromComponent(getHandle().listName);
+-- 
+2.20.1.windows.1
+

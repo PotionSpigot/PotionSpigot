@@ -1,0 +1,97 @@
+From 785713defcb8aa8f4dec55c04e94f38c5e7af786 Mon Sep 17 00:00:00 2001
+From: Eric <ehock7229@outlook.com>
+Date: Thu, 24 Aug 2023 10:10:04 -0400
+Subject: [PATCH] Add disguise system
+
+
+diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
+index e6186903..7e32e78f 100644
+--- a/src/main/java/org/bukkit/Bukkit.java
++++ b/src/main/java/org/bukkit/Bukkit.java
+@@ -155,6 +155,10 @@ public final class Bukkit {
+         return server.getOnlinePlayers();
+     }
+ 
++    public static Map<String, ? extends Player> getDisguisedPlayers() {
++        return server.getDisguisedPlayers();
++    }
++
+     /**
+      * Get the maximum amount of players which can login to this server.
+      *
+diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
+index 5ddde44c..29a466bb 100644
+--- a/src/main/java/org/bukkit/Server.java
++++ b/src/main/java/org/bukkit/Server.java
+@@ -131,6 +131,16 @@ public interface Server extends PluginMessageRecipient {
+      */
+     public Collection<? extends Player> getOnlinePlayers();
+ 
++    public Map<String, ? extends Player> getDisguisedPlayers();
++
++    /**
++     * Gets a disguised player object by the given username.
++     *
++     * @param name the name to look up
++     * @return a player if one was found, null otherwise
++     */
++    public Player getDisguisedPlayer(String name);
++
+     /**
+      * Get the maximum amount of players which can login to this server.
+      *
+diff --git a/src/main/java/org/bukkit/entity/Player.java b/src/main/java/org/bukkit/entity/Player.java
+index 162f6553..0fdb51b6 100644
+--- a/src/main/java/org/bukkit/entity/Player.java
++++ b/src/main/java/org/bukkit/entity/Player.java
+@@ -50,6 +50,47 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
+      */
+     public void setDisplayName(String name);
+ 
++    // PotionSpigot Start
++
++    /**
++     * Whether the player has xray detection ignored
++     * @return true if xray detection is ignored
++     */
++    public boolean ignoreXray();
++
++    /**
++     * Sets if player xray detection should be ignored
++     * @param ignoreXray ignore xray
++     */
++    public void setIgnoreXray(boolean ignoreXray);
++
++    /**
++     * The name of the disguised player or name of player if not disguised
++     * @return name of the disguised player or name of player if not disguised
++     */
++    public String getDisguisedName();
++
++    /**
++     * Whether player is disguised
++     * @return true if player is disguised
++     */
++    public boolean isDisguised();
++
++    /**
++     * Disguise the player
++     * @param name the name of the disguised player
++     * @param texture the texture to use
++     * @param textureSignature the texture signature
++     */
++    public void disguise(String name, String texture, String textureSignature);
++
++    /**
++     * Undisguise the player
++     */
++    public void undisguise();
++
++    // PotionSpigot End
++
+     /**
+      * Gets the name that is shown on the player list.
+      *
+-- 
+2.20.1.windows.1
+
