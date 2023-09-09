@@ -1,0 +1,48 @@
+From dfc51ad2d164f743c25c47aa9354b893e9a3d56d Mon Sep 17 00:00:00 2001
+From: Eric <ehock7229@outlook.com>
+Date: Sat, 9 Sep 2023 10:42:08 -0400
+Subject: [PATCH] Add a method to get a disguised player by disguise name
+
+
+diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
+index 7e32e78f..e638ae28 100644
+--- a/src/main/java/org/bukkit/Bukkit.java
++++ b/src/main/java/org/bukkit/Bukkit.java
+@@ -155,10 +155,14 @@ public final class Bukkit {
+         return server.getOnlinePlayers();
+     }
+ 
++    // PotionSpigot Start
++
+     public static Map<String, ? extends Player> getDisguisedPlayers() {
+         return server.getDisguisedPlayers();
+     }
+ 
++    // PotionSpigot Start
++
+     /**
+      * Get the maximum amount of players which can login to this server.
+      *
+@@ -415,6 +419,19 @@ public final class Bukkit {
+         return server.getPlayer(name);
+     }
+ 
++    // PotionSpigot Start
++
++    /**
++     * Get a disguised player by the disguise name
++     * @param name the disguise name
++     * @return a player if one was found, null otherwise
++     */
++    public static Player getDisguisedPlayer(String name) {
++        return server.getDisguisedPlayer(name);
++    }
++
++    // PotionSpigot End
++
+     /**
+      * Gets the player with the exact given name, case insensitive.
+      *
+-- 
+2.20.1.windows.1
+
